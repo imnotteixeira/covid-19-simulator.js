@@ -28,31 +28,42 @@ const convertToLinearCoord = ([line, col]) => (line * MATRIX_SIDE) + col;
 const convertToXYCoord = (index) => ([Math.floor(index / MATRIX_SIDE), index % MATRIX_SIDE]);
 
 // eslint-disable-next-line no-unused-vars
-const isContaminated = (matrix, coord) => matrix[coord] === "X";
+const isContaminated = (population, coord) => population[coord] === "X";
 
-const getContaminatedIndexes = (matrix, line, col) => {
-    const area = getAffectedCoords(line, col);
-
+const getContaminatedIndexes = (population, line, col) => {
     // contaminating everyone in the area - to change, must add a randomness condition before calling contaminate
-    return area.map(convertToLinearCoord).filter((i) => !isContaminated(matrix, i));
+    const area = getAffectedCoords(line, col).map(convertToLinearCoord).filter((i) => !isContaminated(population, i));
+
+    // Include self
+    area.push(convertToLinearCoord([line, col]));
+
+    // console.log(convertToLinearCoord([line, col]), area);
+
+    return area;
 
 };
 
-const propagateDisease = (matrix, carriers) => {
+const propagateDisease = (population, carriers) => {
     const newCarriers = new Set();
-    const contaminated = carriers.map(([line, col]) => getContaminatedIndexes(matrix, line, col));
+
+    const contaminated = carriers.map((c) => getContaminatedIndexes(population, ...convertToXYCoord(c)));
     contaminated.forEach((contaminatedArea) => contaminatedArea.forEach((i) => newCarriers.add(i)));
 
+    // console.log("newCarriers", newCarriers);
+
+    // console.log("old pop", population);
     newCarriers.forEach((i) => {
-        contaminate(matrix, i);
+        contaminate(population, i);
     });
 
-    return matrix;
+    // console.log("new pop", population);
+
+    return Array.from(newCarriers);
 };
 
-const contaminate = (matrix, i) => {
-    matrix[i] = "X";
-    return matrix;
+const contaminate = (population, i) => {
+    population[i] = "X";
+    return population;
 };
 
 const displayMatrix = (m) => {
@@ -68,27 +79,28 @@ const displayMatrix = (m) => {
     console.log("-".repeat(MATRIX_SIDE));
 };
 
-const getCarrierCoords = (matrix) => {
+const getCarrierCoords = (population) => {
     const res = [];
-    matrix.forEach((_, i) => {
-        if (isContaminated(matrix, i)) res.push(convertToXYCoord(i));
+    population.forEach((_, i) => {
+        if (isContaminated(population, i)) res.push(convertToXYCoord(i));
     });
     return res;
 };
-let population = Array(MATRIX_SIDE * MATRIX_SIDE).fill(0);
+const population = Array(MATRIX_SIDE * MATRIX_SIDE).fill(0);
 let carriers = [
-    [MATRIX_SIDE / 2, MATRIX_SIDE / 2],
+    convertToLinearCoord([MATRIX_SIDE / 2, MATRIX_SIDE / 2]),
 ];
-carriers.forEach(([l, c]) => contaminate(population, convertToLinearCoord([l, c])));
+carriers.forEach((c) => contaminate(population, c));
 // displayMatrix(population);
 
 const init = () => {
 
-    while (carriers.length < 1000000) {
-    // while (!population.every((_, i) => isContaminated(population, i))) {
-        console.log(carriers.length);
-        population = propagateDisease(population, carriers);
-        carriers = getCarrierCoords(population);
+    let step = 0;
+    // while (carriers.length < 1000000) {
+    while (!population.every((_, i) => isContaminated(population, i))) {
+        step++;
+        console.log(step, carriers.length);
+        carriers = propagateDisease(population, carriers);
         // displayMatrix(population);
     }
 };
