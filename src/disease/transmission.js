@@ -32,32 +32,6 @@ const getAffectedCoords = (line, col, spreadRadius) => {
             affected.push([line + i, col - j]);
             affected.push([line + i, col + j]);
         }
-        // const UP = [line - i, col];
-        // const DOWN = [line + i, col];
-        // const LEFT = [line, col - i];
-        // const RIGHT = [line, col + i];
-        // const UP_LEFT = [line - i, col - i];
-        // const UP_RIGHT = [line - i, col + i];
-        // const DOWN_LEFT = [line + i, col - i];
-        // const DOWN_RIGHT = [line + i, col + i];
-
-        // affected.push(
-        //     ...[
-        //         UP,
-        //         DOWN,
-        //         LEFT,
-        //         RIGHT,
-        //         UP_LEFT,
-        //         UP_RIGHT,
-        //         DOWN_LEFT,
-        //         DOWN_RIGHT,
-        //     ].filter(([x, y]) =>
-        //         x >= 0
-        //         && x < config.MATRIX_SIDE
-        //         && y >= 0
-        //         && y < config.MATRIX_SIDE,
-        //     ),
-        // );
     }
     return affected.filter(([x, y]) =>
         x >= 0
@@ -73,7 +47,7 @@ const getContaminatedIndexes = (population, spreadRadius, line, col) =>
         .filter((i) => !isContaminated(population, i));
 
 
-const propagateDisease = (population, carriers, spreadRadius) => {
+const propagateDisease = (population, carriers, spreadRadius, hygieneDisregard) => {
     const newCarriers = new Set();
 
     const contaminated = carriers.map((c) => getContaminatedIndexes(population, spreadRadius, ...convertToXYCoord(c)));
@@ -81,8 +55,11 @@ const propagateDisease = (population, carriers, spreadRadius) => {
 
     newCarriers.forEach((i) => {
         // contaminating everyone in the area - to change, must add a randomness condition before calling contaminate
-        contaminate(population, i);
-        carriers.push(i);
+        const hygieneRand = Math.random();
+        if (hygieneRand < hygieneDisregard) {
+            contaminate(population, i);
+            carriers.push(i);
+        }
     });
 };
 

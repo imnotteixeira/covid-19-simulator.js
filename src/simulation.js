@@ -7,6 +7,7 @@ const simulate = (simulation, maxSteps) => {
         population,
         carriers,
         spreadRadius,
+        hygieneDisregard,
     } = simulation;
 
     let step = 0;
@@ -20,7 +21,7 @@ const simulate = (simulation, maxSteps) => {
 
 
         step++;
-        propagateDisease(population, carriers, spreadRadius);
+        propagateDisease(population, carriers, spreadRadius, hygieneDisregard);
         if (population.length <= 100) {
             displayMatrix(population);
         } else {
