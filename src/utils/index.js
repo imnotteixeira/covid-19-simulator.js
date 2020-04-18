@@ -14,16 +14,16 @@ const StateRepresentation = Object.freeze({
 const getRepresentation = (individual) => StateRepresentation[individual.state];
 
 const displayMatrix = (m) => {
-    console.log("-".repeat(config.MATRIX_SIDE));
+    console.info("-".repeat(config.MATRIX_SIDE));
     for (let i = 0; i < config.MATRIX_SIDE; i++) {
         let str = "";
         for (let j = 0; j < config.MATRIX_SIDE; j++) {
             str += `${getRepresentation(m[convertToLinearCoord([i, j])])}, `;
 
         }
-        console.log(str);
+        console.info(str);
     }
-    console.log("-".repeat(config.MATRIX_SIDE));
+    console.info("-".repeat(config.MATRIX_SIDE));
 };
 
 // This can be memoized
