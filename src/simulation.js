@@ -29,7 +29,10 @@ const simulate = (simulation, maxSteps) => {
 
         MetricsService.collect("carrier-count", { carriers });
 
-        if (maxSteps && step === maxSteps) break;
+        if (maxSteps && step === maxSteps) {
+            console.warn(`Maximum steps reached (${maxSteps}), Stopping simulation...`);
+            break;
+        }
 
     }
 };

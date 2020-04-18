@@ -25,6 +25,7 @@ class MetricsService {
     }
 
     print() {
+        console.info("Metrics Output");
         this.metricsData.forEach((data, id) => console.info(`[${id}] ${data}`));
     }
 }
