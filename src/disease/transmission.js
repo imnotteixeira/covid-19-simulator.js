@@ -2,16 +2,14 @@ const {
     IndividualStates,
     convertToLinearCoord,
     convertToXYCoord,
+    isContaminated,
+    isDead,
 } = require("../utils");
 const config = require("../config");
 
-const isContaminated = (population, coord) =>
-    population[coord].state === IndividualStates.CARRIER
-    || population[coord].state === IndividualStates.CONFIRMED_CARRIER;
-
 const contaminate = (population, i) => {
     population[i].state = IndividualStates.CARRIER;
-    population[i].daysSinceTrasmission = 0;
+    population[i].daysSinceTransmission = 0;
     return population;
 };
 
@@ -44,7 +42,10 @@ const getAffectedCoords = (line, col, spreadRadius) => {
 const getContaminatedIndexes = (population, spreadRadius, line, col) =>
     getAffectedCoords(line, col, spreadRadius)
         .map(convertToLinearCoord)
-        .filter((i) => !isContaminated(population, i));
+        .filter((i) =>
+            !isContaminated(population, i)
+            && !isDead(population, i),
+        );
 
 
 const propagateDisease = (population, carriers, spreadRadius, hygieneDisregard) => {

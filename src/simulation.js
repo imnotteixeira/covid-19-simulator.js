@@ -1,4 +1,5 @@
 const { propagateDisease, isContaminated } = require("./disease/transmission");
+const { calculateOutcomes, updateCarriersDetails } = require("./disease/outcome");
 const { displayMatrix } = require("./utils");
 const MetricsService = require("./metrics");
 
@@ -6,6 +7,7 @@ const simulate = (simulation, maxSteps) => {
     const {
         population,
         carriers,
+        dead,
         spreadRadius,
         hygieneDisregard,
     } = simulation;
@@ -20,14 +22,19 @@ const simulate = (simulation, maxSteps) => {
     while (!population.every((_, i) => isContaminated(population, i))) {
 
         // console.debug("Step: ", step);
+        updateCarriersDetails(population, carriers);
 
         step++;
         propagateDisease(population, carriers, spreadRadius, hygieneDisregard);
+
+        calculateOutcomes(population, carriers, dead);
+
         if (population.length <= 100) {
             displayMatrix(population);
         }
 
         MetricsService.collect("carrier-count", { carriers });
+        MetricsService.collect("dead-count", { dead });
 
         if (maxSteps && step === maxSteps) {
             console.warn(`Maximum steps reached (${maxSteps}), Stopping simulation...`);

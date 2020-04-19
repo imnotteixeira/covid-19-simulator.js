@@ -38,9 +38,17 @@ const IndividualStates = Object.freeze({
     DEAD: "DEAD",
 });
 
+const isDead = (population, i) => population[i].state === IndividualStates.DEAD;
+
+const isContaminated = (population, coord) =>
+    population[coord].state === IndividualStates.CARRIER
+    || population[coord].state === IndividualStates.CONFIRMED_CARRIER;
+
 module.exports = {
     IndividualStates,
     displayMatrix,
     convertToLinearCoord,
     convertToXYCoord,
+    isDead,
+    isContaminated,
 };
