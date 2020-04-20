@@ -39,6 +39,7 @@ const IndividualStates = Object.freeze({
 });
 
 const isDead = (population, i) => population[i].state === IndividualStates.DEAD;
+const isCured = (population, i) => population[i].state === IndividualStates.CURED;
 
 const isContaminated = (population, coord) =>
     population[coord].state === IndividualStates.CARRIER
@@ -50,5 +51,6 @@ module.exports = {
     convertToLinearCoord,
     convertToXYCoord,
     isDead,
+    isCured,
     isContaminated,
 };

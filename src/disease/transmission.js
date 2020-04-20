@@ -4,6 +4,7 @@ const {
     convertToXYCoord,
     isContaminated,
     isDead,
+    isCured,
 } = require("../utils");
 const config = require("../config");
 
@@ -39,13 +40,15 @@ const getAffectedCoords = (line, col, spreadRadius) => {
     );
 };
 
+const isViableTarget = (population, i) =>
+    !isContaminated(population, i)
+    && !isDead(population, i)
+    && !isCured(population, i);
+
 const getContaminatedIndexes = (population, spreadRadius, line, col) =>
     getAffectedCoords(line, col, spreadRadius)
         .map(convertToLinearCoord)
-        .filter((i) =>
-            !isContaminated(population, i)
-            && !isDead(population, i),
-        );
+        .filter((i) => isViableTarget(population, i));
 
 
 const propagateDisease = (population, carriers, spreadRadius, hygieneDisregard) => {

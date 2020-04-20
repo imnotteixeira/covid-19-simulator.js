@@ -23,12 +23,21 @@ const generateDeathProbabilityFunction = (susceptibility) => (day) => {
     else return susceptibility * Math.exp(-Math.pow((day - 14), 2) / 41);
 };
 
+const generateCureProbabilityFunction = (susceptibility) => (day) => {
+    if (day < 0)
+        throw new Error("Trying to calculate cure probabilty for day < 0, you probably forgot to increment it in the simulation loop");
+
+    return 1 / (1 + Math.exp(-(day / ((0.5 * susceptibility) + 1)) + 11));
+};
+
 const createIndividual = (susceptibility) => {
     const deathProbabilityFn = generateDeathProbabilityFunction(susceptibility);
+    const cureProbabilityFn = generateCureProbabilityFunction(susceptibility);
 
     return {
         susceptibility,
         deathProbabilityFn,
+        cureProbabilityFn,
         deathProbability: 0,
         daysSinceTransmission: -1,
         state: IndividualStates.HEALTHY,
@@ -71,6 +80,7 @@ module.exports = ({
         population,
         carriers: initialCarriers,
         dead: [],
+        cured: [],
         hygieneDisregard,
         spreadRadius,
         // confirmedCarriers: [],

@@ -8,6 +8,7 @@ const simulate = (simulation, maxSteps) => {
         population,
         carriers,
         dead,
+        cured,
         spreadRadius,
         hygieneDisregard,
     } = simulation;
@@ -32,7 +33,7 @@ const simulate = (simulation, maxSteps) => {
         step++;
         propagateDisease(population, carriers, spreadRadius, hygieneDisregard);
 
-        calculateOutcomes(population, carriers, dead);
+        calculateOutcomes(population, carriers, dead, cured);
 
         if (population.length <= 100) {
             displayMatrix(population);
@@ -40,6 +41,7 @@ const simulate = (simulation, maxSteps) => {
 
         MetricsService.collect("carrier-count", { carriers });
         MetricsService.collect("dead-count", { dead });
+        MetricsService.collect("cured-count", { cured });
 
         if (maxSteps && step === maxSteps) {
             console.warn(`Maximum steps reached (${maxSteps}), Stopping simulation...`);
