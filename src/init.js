@@ -41,6 +41,8 @@ const createIndividual = (susceptibility) => {
         deathProbability: 0,
         daysSinceTransmission: -1,
         state: IndividualStates.HEALTHY,
+        isHospitalized: false,
+        isQuarantined: false,
     };
 };
 
@@ -68,7 +70,8 @@ module.exports = ({
     initialCarriers = [(populationSize / 2) + (config.MATRIX_SIDE / 2)],
     // deathProbablityFn,
     // cureProbabilityFn,
-    // hospitalCapacity,
+    hospitalCapacity,
+    hospitalEffectiveness,
     // quarantinePeriod,
     // quarantineDelay,
 }) => {
@@ -81,8 +84,11 @@ module.exports = ({
         carriers: initialCarriers,
         dead: [],
         cured: [],
+        hospitalized: [],
         hygieneDisregard,
         spreadRadius,
+        hospitalCapacity,
+        hospitalEffectiveness,
         // confirmedCarriers: [],
         // hospitalized: [],
         // dead: [],

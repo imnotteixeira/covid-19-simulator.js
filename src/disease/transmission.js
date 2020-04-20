@@ -5,6 +5,7 @@ const {
     isContaminated,
     isDead,
     isCured,
+    isHospitalized,
 } = require("../utils");
 const config = require("../config");
 
@@ -54,7 +55,10 @@ const getContaminatedIndexes = (population, spreadRadius, line, col) =>
 const propagateDisease = (population, carriers, spreadRadius, hygieneDisregard) => {
     const newCarriers = new Set();
 
-    const contaminated = carriers.map((c) => getContaminatedIndexes(population, spreadRadius, ...convertToXYCoord(c)));
+    const contaminated = carriers.map((c) => {
+        if (isHospitalized(population, c)) return [];
+        else return getContaminatedIndexes(population, spreadRadius, ...convertToXYCoord(c));
+    });
     contaminated.forEach((contaminatedArea) => contaminatedArea.forEach((i) => newCarriers.add(i)));
 
     newCarriers.forEach((i) => {

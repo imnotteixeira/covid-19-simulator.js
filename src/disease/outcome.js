@@ -1,39 +1,49 @@
 const {
     IndividualStates,
     isContaminated,
+    isHospitalized,
+    removeCarrier,
+    removeHospitalized,
 } = require("../utils");
 
-const kill = (population, i, dead) => {
+const config = require("../config");
+
+const kill = (population, i, dead, hospitalized) => {
     population[i].state = IndividualStates.DEAD;
     dead.push(i);
+    if (isHospitalized(population, i))
+        leaveHospital(population, i, hospitalized);
     return population;
 };
-const cure = (population, i, cured) => {
+const cure = (population, i, cured, hospitalized) => {
     population[i].state = IndividualStates.CURED;
     cured.push(i);
+    if (isHospitalized(population, i))
+        leaveHospital(population, i, hospitalized);
     return population;
 };
 
-const calculateOutcomes = (population, carriers, dead, cured) => {
+const leaveHospital = (population, i, hospitalized) => {
+    removeHospitalized(hospitalized, i);
+    population[i].isHospitalized = false;
+};
+
+const calculateOutcomes = (population, carriers, dead, cured, hospitalized, hospitalEffectiveness) => {
     population.forEach((individual, i) => {
         if (isContaminated(population, i)) {
+
+            let deathProbability = individual.deathProbabilityFn(individual.daysSinceTransmission);
+            if (isHospitalized(population, i)) deathProbability *= hospitalEffectiveness;
+
             const dieRandom = Math.random();
-            if (dieRandom < individual.deathProbabilityFn(individual.daysSinceTransmission)) {
-                kill(population, i, dead);
-                for (let c = 0; c < carriers.length; c++) {
-                    if (carriers[c] === i) {
-                        carriers.splice(c, 1);
-                    }
-                }
+            if (dieRandom < deathProbability) {
+                kill(population, i, dead, hospitalized);
+                removeCarrier(carriers, i);
             } else {
                 const cureRandom = Math.random();
                 if (cureRandom < individual.cureProbabilityFn(individual.daysSinceTransmission)) {
-                    cure(population, i, cured);
-                    for (let c = 0; c < carriers.length; c++) {
-                        if (carriers[c] === i) {
-                            carriers.splice(c, 1);
-                        }
-                    }
+                    cure(population, i, cured, hospitalized);
+                    removeCarrier(carriers, i);
                 }
             }
         }

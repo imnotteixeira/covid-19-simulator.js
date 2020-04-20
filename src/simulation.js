@@ -1,5 +1,6 @@
 const { propagateDisease, isContaminated } = require("./disease/transmission");
 const { calculateOutcomes, updateCarriersDetails } = require("./disease/outcome");
+const { hospitalize } = require("./disease/hospitalize");
 const { displayMatrix } = require("./utils");
 const MetricsService = require("./metrics");
 
@@ -9,8 +10,11 @@ const simulate = (simulation, maxSteps) => {
         carriers,
         dead,
         cured,
+        hospitalized,
         spreadRadius,
         hygieneDisregard,
+        hospitalCapacity,
+        hospitalEffectiveness,
     } = simulation;
 
     console.info(`Simulating${maxSteps ? ` with max steps = ${maxSteps}` : ""}...`);
@@ -33,7 +37,9 @@ const simulate = (simulation, maxSteps) => {
         step++;
         propagateDisease(population, carriers, spreadRadius, hygieneDisregard);
 
-        calculateOutcomes(population, carriers, dead, cured);
+        calculateOutcomes(population, carriers, dead, cured, hospitalized, hospitalEffectiveness);
+
+        hospitalize(population, carriers, hospitalized, hospitalCapacity);
 
         if (population.length <= 100) {
             displayMatrix(population);
@@ -42,6 +48,7 @@ const simulate = (simulation, maxSteps) => {
         MetricsService.collect("carrier-count", { carriers });
         MetricsService.collect("dead-count", { dead });
         MetricsService.collect("cured-count", { cured });
+        MetricsService.collect("hospitalized-count", { hospitalized });
 
         if (maxSteps && step === maxSteps) {
             console.warn(`Maximum steps reached (${maxSteps}), Stopping simulation...`);
