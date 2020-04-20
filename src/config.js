@@ -8,4 +8,6 @@ module.exports = {
     HYGIENE_DISREGARD: parseFloat(process.env.HYGIENE_DISREGARD),
     HOSPITAL_CAPACITY: parseInt(process.env.HOSPITAL_CAPACITY, 10),
     HOSPITAL_EFFECTIVENESS: parseFloat(process.env.HOSPITAL_EFFECTIVENESS),
+    INCUBATION_PERIOD: parseInt(process.env.INCUBATION_PERIOD, 10),
+    INFECTION_PERIOD: parseInt(process.env.INFECTION_PERIOD, 10),
 };

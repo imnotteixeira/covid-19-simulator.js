@@ -19,8 +19,9 @@ const generateDeathProbabilityFunction = (susceptibility) => (day) => {
     if (day < 0)
         throw new Error("Trying to calculate death probabilty for day < 0, you probably forgot to increment it in the simulation loop");
 
-    if (day <= 14) return susceptibility * Math.exp(-Math.pow((day - 14), 2) / 6);
-    else return susceptibility * Math.exp(-Math.pow((day - 14), 2) / 41);
+    const peak = config.INCUBATION_PERIOD + (0.23 * (config.INFECTION_PERIOD - config.INCUBATION_PERIOD));
+    if (day <= 14) return susceptibility * Math.exp(-Math.pow((day - peak), 2) / config.INCUBATION_PERIOD);
+    else return susceptibility * Math.exp(-Math.pow((day - peak), 2) / config.INFECTION_PERIOD);
 };
 
 const generateCureProbabilityFunction = (susceptibility) => (day) => {
