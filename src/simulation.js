@@ -21,6 +21,11 @@ const simulate = (simulation, maxSteps) => {
     MetricsService.collect("carrier-count", { carriers });
     while (!population.every((_, i) => isContaminated(population, i))) {
 
+        if (carriers.length === 0) {
+            console.warn("No carriers left, Stopping simulation...");
+            break;
+        }
+
         // console.debug("Step: ", step);
         updateCarriersDetails(population, carriers);
 
