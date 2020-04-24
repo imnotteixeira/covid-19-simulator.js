@@ -1,5 +1,4 @@
 const { IndividualStates } = require("./utils");
-const config = require("./config");
 const { contaminate } = require("./disease/transmission");
 
 /**
@@ -15,13 +14,13 @@ const generateSusceptibilityDistribution = (size) => {
 
 };
 
-const generateDeathProbabilityFunction = (susceptibility) => (day) => {
+const generateDeathProbabilityFunction = (susceptibility, config) => (day) => {
     if (day < 0)
         throw new Error("Trying to calculate death probabilty for day < 0, you probably forgot to increment it in the simulation loop");
 
-    const peak = config.INCUBATION_PERIOD + (0.23 * (config.INFECTION_PERIOD - config.INCUBATION_PERIOD));
-    if (day <= 14) return susceptibility * Math.exp(-Math.pow((day - peak), 2) / config.INCUBATION_PERIOD);
-    else return susceptibility * Math.exp(-Math.pow((day - peak), 2) / config.INFECTION_PERIOD);
+    const peak = config.incubationPeriod + (0.23 * (config.infectionPeriod - config.incubationPeriod));
+    if (day <= 14) return susceptibility * Math.exp(-Math.pow((day - peak), 2) / config.incubationPeriod);
+    else return susceptibility * Math.exp(-Math.pow((day - peak), 2) / config.infectionPeriod);
 };
 
 const generateCureProbabilityFunction = (susceptibility) => (day) => {
@@ -31,8 +30,8 @@ const generateCureProbabilityFunction = (susceptibility) => (day) => {
     return 1 / (1 + Math.exp(-(day / ((0.5 * susceptibility) + 1)) + 11));
 };
 
-const createIndividual = (susceptibility) => {
-    const deathProbabilityFn = generateDeathProbabilityFunction(susceptibility);
+const createIndividual = (susceptibility, config) => {
+    const deathProbabilityFn = generateDeathProbabilityFunction(susceptibility, config);
     const cureProbabilityFn = generateCureProbabilityFunction(susceptibility);
 
     return {
@@ -47,14 +46,14 @@ const createIndividual = (susceptibility) => {
     };
 };
 
-const initPopulation = (size) => {
+const initPopulation = (size, config) => {
     if (size > 0 && Math.sqrt(size) % 1 === 0) {
         const population = [];
 
         const susceptibilities = generateSusceptibilityDistribution(size);
 
         for (let i = 0; i < size; i++) {
-            population[i] = createIndividual(susceptibilities[i]);
+            population[i] = createIndividual(susceptibilities[i], config);
         }
 
         return population;
@@ -68,15 +67,23 @@ module.exports = ({
     populationSize = 100,
     hygieneDisregard = 1,
     spreadRadius = 1,
-    initialCarriers = [(populationSize / 2) + (config.MATRIX_SIDE / 2)],
+    initialCarriers = [0],
     // deathProbablityFn,
     // cureProbabilityFn,
     hospitalCapacity,
     hospitalEffectiveness,
+    incubationPeriod,
+    infectionPeriod,
     // quarantinePeriod,
     // quarantineDelay,
 }) => {
-    const population = initPopulation(populationSize); // TODO pass S distribution to attribute S to each individual on setup
+
+    const config = {
+        incubationPeriod,
+        infectionPeriod,
+    };
+
+    const population = initPopulation(populationSize, config); // TODO pass S distribution to attribute S to each individual on setup
 
     initialCarriers.forEach((carrier) => contaminate(population, carrier));
 
@@ -90,10 +97,10 @@ module.exports = ({
         spreadRadius,
         hospitalCapacity,
         hospitalEffectiveness,
+        incubationPeriod,
+        infectionPeriod,
         // confirmedCarriers: [],
-        // hospitalized: [],
         // dead: [],
-        // cured: [],
         // quarantined: [],
     };
 };

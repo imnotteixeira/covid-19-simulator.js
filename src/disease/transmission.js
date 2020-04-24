@@ -7,7 +7,6 @@ const {
     isCured,
     isHospitalized,
 } = require("../utils");
-const config = require("../config");
 
 const contaminate = (population, i) => {
     population[i].state = IndividualStates.CARRIER;
@@ -16,7 +15,7 @@ const contaminate = (population, i) => {
 };
 
 // This can be memoized
-const getAffectedCoords = (line, col, spreadRadius) => {
+const getAffectedCoords = (line, col, spreadRadius, matrixSide) => {
     const affected = [];
     for (let i = 1; i <= spreadRadius; i++) {
         for (let j = 1; j <= spreadRadius; j++) {
@@ -35,9 +34,9 @@ const getAffectedCoords = (line, col, spreadRadius) => {
     }
     return affected.filter(([x, y]) =>
         x >= 0
-        && x < config.MATRIX_SIDE
+        && x < matrixSide
         && y >= 0
-        && y < config.MATRIX_SIDE,
+        && y < matrixSide,
     );
 };
 
@@ -46,10 +45,13 @@ const isViableTarget = (population, i) =>
     && !isDead(population, i)
     && !isCured(population, i);
 
-const getContaminatedIndexes = (population, spreadRadius, line, col) =>
-    getAffectedCoords(line, col, spreadRadius)
-        .map(convertToLinearCoord)
+const getContaminatedIndexes = (population, spreadRadius, line, col) => {
+
+    const matrixSide = Math.sqrt(population.length);
+    return getAffectedCoords(line, col, spreadRadius, matrixSide)
+        .map((c) => convertToLinearCoord(c, matrixSide))
         .filter((i) => isViableTarget(population, i));
+};
 
 
 const propagateDisease = (population, carriers, spreadRadius, hygieneDisregard) => {
@@ -57,7 +59,7 @@ const propagateDisease = (population, carriers, spreadRadius, hygieneDisregard) 
 
     const contaminated = carriers.map((c) => {
         if (isHospitalized(population, c)) return [];
-        else return getContaminatedIndexes(population, spreadRadius, ...convertToXYCoord(c));
+        else return getContaminatedIndexes(population, spreadRadius, ...convertToXYCoord(c, Math.sqrt(population.length)));
     });
     contaminated.forEach((contaminatedArea) => contaminatedArea.forEach((i) => newCarriers.add(i)));
 

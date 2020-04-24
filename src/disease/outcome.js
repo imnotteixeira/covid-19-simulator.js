@@ -6,7 +6,6 @@ const {
     removeHospitalized,
 } = require("../utils");
 
-const config = require("../config");
 
 const kill = (population, i, dead, hospitalized) => {
     population[i].state = IndividualStates.DEAD;

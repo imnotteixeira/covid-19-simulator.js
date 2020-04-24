@@ -4,7 +4,7 @@ const { hospitalize } = require("./disease/hospitalize");
 const { displayMatrix } = require("./utils");
 const MetricsService = require("./metrics");
 
-const simulate = (simulation, maxSteps) => {
+const simulate = (simulation, maxSteps, hooks) => {
     const {
         population,
         carriers,
@@ -15,14 +15,17 @@ const simulate = (simulation, maxSteps) => {
         hygieneDisregard,
         hospitalCapacity,
         hospitalEffectiveness,
+        incubationPeriod,
     } = simulation;
+
+    const {
+        stepEnd = () => {},
+    } = hooks;
 
     console.info(`Simulating${maxSteps ? ` with max steps = ${maxSteps}` : ""}...`);
 
     let step = 0;
-    if (population.length > 100) {
-        console.info("Population too big. Will not render population.");
-    }
+
     MetricsService.collect("carrier-count", { carriers });
     while (!population.every((_, i) => isContaminated(population, i))) {
 
@@ -39,11 +42,9 @@ const simulate = (simulation, maxSteps) => {
 
         calculateOutcomes(population, carriers, dead, cured, hospitalized, hospitalEffectiveness);
 
-        hospitalize(population, carriers, hospitalized, hospitalCapacity);
+        hospitalize(population, carriers, hospitalized, hospitalCapacity, incubationPeriod);
 
-        if (population.length <= 100) {
-            displayMatrix(population);
-        }
+        stepEnd(simulation);
 
         MetricsService.collect("carrier-count", { carriers });
         MetricsService.collect("dead-count", { dead });

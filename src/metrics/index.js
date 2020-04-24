@@ -1,9 +1,9 @@
 class MetricsService {
     constructor() {
         this.collectors = new Map();
+        this.subscribedCollectors = new Set();
         this.metricsData = new Map();
     }
-
 
     register(id, collector, initialData = null) {
         if (this.collectors.has(id)) throw new Error("There is already a collector defined for that metric type");
@@ -15,18 +15,18 @@ class MetricsService {
     }
 
     collect(id, payload) {
-        // eslint-disable-next-line no-prototype-builtins
-        if (!this.collectors.has(id)) throw new Error(
-            `There is no collector registered for ${id} metric type. 
-            Please call register() on setup to register a collector for this metric type`,
-        );
-
-        this.collectors.get(id)(payload);
+        if (!this.subscribedCollectors.has(id)) return;
+        else this.collectors.get(id)(payload);
     }
 
-    print() {
-        console.info("Metrics Output");
-        this.metricsData.forEach((data, id) => console.info(`[${id}] ${data}`));
+    subscribe(id) {
+        if (this.subscribedCollectors.has(id)) throw new Error(`The ${id} metric was already subscribed to.`);
+        else if (!this.collectors.has(id)) throw new Error(`Invalid ID. There is no collector registered for metric ${id}`);
+        else this.subscribedCollectors.add(id);
+    }
+
+    export() {
+        return this.metricsData.map((data, id) => ({ id, data }));
     }
 }
 

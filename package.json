@@ -1,17 +1,21 @@
 {
-  "name": "covid-19-simulator",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@imnotteixeira/covid-19-simulator",
+  "version": "0.5.2",
+  "description": "A Simulator for the COVID-19 epidemic, to analyse measures effectiveness.",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "release": "np"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Angelo Teixeira",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/imnotteixeira/covid-19-simulator.js/issues"
+  },
+  "homepage": "https://github.com/imnotteixeira/covid-19-simulator.js#readme",
   "devDependencies": {
-    "eslint": "^6.8.0"
+    "eslint": "^6.8.0",
+    "np": "^6.2.2"
   },
-  "dependencies": {
-    "dotenv-flow": "^3.1.0"
-  }
+  "dependencies": {}
 }
