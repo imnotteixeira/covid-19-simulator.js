@@ -26,7 +26,11 @@ class MetricsService {
     }
 
     export() {
-        return this.metricsData.map((data, id) => ({ id, data }));
+        const metrics = [];
+        this.metricsData.forEach((data, id) => {
+            metrics.push({ id, data });
+        });
+        return metrics;
     }
 }
 
