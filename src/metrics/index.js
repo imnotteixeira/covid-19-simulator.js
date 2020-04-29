@@ -25,6 +25,15 @@ class MetricsService {
         else this.subscribedCollectors.add(id);
     }
 
+    unsubscribe(id) {
+        if (!this.collectors.has(id)) throw new Error(`Invalid ID. There is no collector registered for metric ${id}`);
+
+        if (!this.subscribedCollectors.has(id)) {
+            console.warn(`The ${id} metric was not subscribed to. Did nothing.`);
+            return;
+        } else this.subscribedCollectors.delete(id);
+    }
+
     export() {
         const metrics = [];
         this.metricsData.forEach((data, id) => {

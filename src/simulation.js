@@ -44,12 +44,17 @@ const simulate = (simulation, maxSteps, hooks) => {
 
         hospitalize(population, carriers, hospitalized, hospitalCapacity, incubationPeriod);
 
-        stepEnd(simulation);
 
         MetricsService.collect("carrier-count", { carriers });
         MetricsService.collect("dead-count", { dead });
         MetricsService.collect("cured-count", { cured });
         MetricsService.collect("hospitalized-count", { hospitalized });
+
+        stepEnd({
+            ...simulation,
+            step,
+        });
+
 
         if (maxSteps && step === maxSteps) {
             console.warn(`Maximum steps reached (${maxSteps}), Stopping simulation...`);
