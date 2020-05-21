@@ -1,4 +1,5 @@
 const { IndividualStates } = require("./utils");
+const { QuarantineTypes } = require("./disease/quarantine");
 const { contaminate } = require("./disease/transmission");
 const populationPresets = require("./population_presets");
 
@@ -54,6 +55,7 @@ const createIndividual = (susceptibility, config) => {
         state: IndividualStates.HEALTHY,
         isHospitalized: false,
         isQuarantined: false,
+        quarantineStart: -1,
     };
 };
 
@@ -90,9 +92,13 @@ module.exports = ({
     hospitalEffectiveness,
     incubationPeriod = 6,
     infectionPeriod = 41,
-    // quarantinePeriod,
-    // quarantineDelay,
     populationPreset = 0,
+    // QUARANTINE
+    quarantineEffectiveness,
+    quarantinePeriod,
+    quarantineDelay,
+    quarantineType,
+    quarantinePercentage,
 }) => {
 
     const config = {
@@ -100,6 +106,19 @@ module.exports = ({
         infectionPeriod,
         populationPreset,
     };
+
+    // eslint-disable-next-line no-prototype-builtins
+    if (quarantineType !== "" && !QuarantineTypes.hasOwnProperty(quarantineType)) {
+        throw new Error(`Trying to use invalid Quarantine Type = ${quarantineType}.`);
+    }
+
+    if (quarantineType === QuarantineTypes.FIXED_PERCENTAGE && !quarantinePercentage) {
+        throw new Error("Trying to use Quarantine Type = Fixed Percentage, but no Quarantine Percentage set.");
+    }
+
+    if (quarantinePercentage && quarantineType !== QuarantineTypes.FIXED_PERCENTAGE) {
+        console.warn(`Set quarantine percentage, but the quarantine type is ${quarantineType}, you probably forgot to change it.`);
+    }
 
     // eslint-disable-next-line no-param-reassign
     if (!populationSize) populationSize = populationPresets[populationPreset].size;
@@ -109,12 +128,12 @@ module.exports = ({
 
     const population = initPopulation(populationSize, config); // TODO pass S distribution to attribute S to each individual on setup
 
-    initialCarriers.forEach((carrier) => contaminate(population, carrier));
-
+    const carriers = [];
+    initialCarriers.forEach((carrier) => contaminate(population, carriers, carrier));
 
     return {
         population,
-        carriers: initialCarriers,
+        carriers,
         dead: [],
         cured: [],
         hospitalized: [],
@@ -127,6 +146,11 @@ module.exports = ({
         step: 0,
         ended: false,
         // confirmedCarriers: [],
-        // quarantined: [],
+        quarantineEffectiveness,
+        quarantinePeriod,
+        quarantineDelay,
+        quarantineType,
+        quarantinePercentage,
+        quarantined: [],
     };
 };

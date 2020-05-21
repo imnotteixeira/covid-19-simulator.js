@@ -20,6 +20,8 @@ const isContaminated = (population, coord) =>
     population[coord].state === IndividualStates.CARRIER
     || population[coord].state === IndividualStates.CONFIRMED_CARRIER;
 
+const isQuarantined = (population, i) => population[i].isQuarantined;
+
 const removeElemByValue = (arr, el) => {
     for (let c = 0; c < arr.length; c++) {
         if (arr[c] === el) {
@@ -30,6 +32,8 @@ const removeElemByValue = (arr, el) => {
 
 const removeCarrier = (carriers, i) => removeElemByValue(carriers, i);
 const removeHospitalized = (hospitalized, i) => removeElemByValue(hospitalized, i);
+const removeQuarantined = (quarantined, i) => removeElemByValue(quarantined, i);
+
 
 module.exports = {
     IndividualStates,
@@ -39,6 +43,8 @@ module.exports = {
     isCured,
     isContaminated,
     isHospitalized,
+    isQuarantined,
     removeCarrier,
     removeHospitalized,
+    removeQuarantined,
 };

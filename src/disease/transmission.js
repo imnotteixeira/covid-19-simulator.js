@@ -6,9 +6,11 @@ const {
     isDead,
     isCured,
     isHospitalized,
+    isQuarantined,
 } = require("../utils");
 
-const contaminate = (population, i) => {
+const contaminate = (population, carriers, i) => {
+    carriers.push(i);
     population[i].state = IndividualStates.CARRIER;
     population[i].daysSinceTransmission = 0;
     return population;
@@ -54,24 +56,51 @@ const getContaminatedIndexes = (population, spreadRadius, line, col) => {
 };
 
 
-const propagateDisease = (population, carriers, spreadRadius, hygieneDisregard) => {
-    const newCarriers = new Set();
+const propagateDisease = (population, carriers, quarantined, spreadRadius, hygieneDisregard, quarantineEffectiveness) => {
 
-    const contaminated = carriers.map((c) => {
-        if (isHospitalized(population, c)) return [];
-        else return getContaminatedIndexes(population, spreadRadius, ...convertToXYCoord(c, Math.sqrt(population.length)));
+    /**
+     * Format: {
+     *      target: [...carrier_sources]
+     * }
+     */
+    const interactions = {};
+
+    carriers.forEach((carrier) => {
+        if (isHospitalized(population, carrier)) return;
+
+        const targets = getContaminatedIndexes(population, spreadRadius, ...convertToXYCoord(carrier, Math.sqrt(population.length)));
+        targets.forEach((target) => {
+            // eslint-disable-next-line no-prototype-builtins
+            if (!interactions.hasOwnProperty(target)) {
+                interactions[target] = [];
+            }
+            interactions[target].push(carrier);
+        });
     });
-    contaminated.forEach((contaminatedArea) => contaminatedArea.forEach((i) => newCarriers.add(i)));
 
-    newCarriers.forEach((i) => {
-        // contaminating everyone in the area - to change, must add a randomness condition before calling contaminate
-        const hygieneRand = Math.random();
-        if (hygieneRand < hygieneDisregard) {
-            contaminate(population, i);
-            carriers.push(i);
+    for (const target in interactions) {
+        const sources = interactions[target];
+
+        const probabilityNotContaminated = sources.reduce((acc, source) =>
+            // Takes into account source quarantine
+            acc * calculateQuarantineContaminationProbability(population, source, quarantineEffectiveness),
+        1);
+
+        // Takes into account target quarantine
+        const contaminationProbability = hygieneDisregard *
+            (1 - probabilityNotContaminated) *
+            calculateQuarantineContaminationProbability(population, target, quarantineEffectiveness);
+
+        const contaminationRand = Math.random();
+
+        if (contaminationRand < contaminationProbability) {
+            contaminate(population, carriers, parseInt(target, 10));
         }
-    });
+    }
 };
+
+const calculateQuarantineContaminationProbability = (population, source, quarantineEffectiveness) =>
+    (1 - isQuarantined(population, source) ? (1 - quarantineEffectiveness) : 1);
 
 module.exports = {
     propagateDisease,
