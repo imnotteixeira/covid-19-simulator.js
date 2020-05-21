@@ -1,18 +1,28 @@
 const { IndividualStates } = require("./utils");
 const { contaminate } = require("./disease/transmission");
+const populationPresets = require("./population_presets");
 
 /**
  * Generates size values of S, according to distribution
  * @param {*} size Number of people
+ * @param {*} susceptibilityDistibution Object where key is a percentage of the population and the value is its susceptibility
  */
-const generateSusceptibilityDistribution = (size) => {
+const generatePopulationSusceptibility = ({ size, susceptibilityDistibution }) => {
 
-    // Hardcoding distribution, change later
-    const distribution = (x) => 0.5 * (x < (size / 2) ? x / (size / 2) : (-x + size) / (size / 2));
-    // const distribution = (x) => Math.exp(-Math.pow((x - (size / 2)), 2));
+    const averageSusceptibility =
+        Object.keys(susceptibilityDistibution).reduce(
+            (acc, percentage) => acc + (susceptibilityDistibution[percentage] * parseFloat(percentage)),
+            0,
+        );
 
-    return Array(size).fill(0).map((_, i) => distribution(i));
+    const susceptibilities = Object.keys(susceptibilityDistibution).reduce((acc, percentage) =>
+        [...acc, ...Array(Math.floor(size * parseFloat(percentage))).fill(susceptibilityDistibution[percentage])]
+    , []);
 
+    return [
+        ...susceptibilities,
+        ...Array(size - susceptibilities.length).fill(averageSusceptibility),
+    ];
 };
 
 const generateDeathProbabilityFunction = (susceptibility, config) => (day) => {
@@ -51,7 +61,12 @@ const initPopulation = (size, config) => {
     if (size > 0 && Math.sqrt(size) % 1 === 0) {
         const population = [];
 
-        const susceptibilities = generateSusceptibilityDistribution(size);
+        const populationPreset = populationPresets[config.populationPreset];
+
+
+        const susceptibilities = generatePopulationSusceptibility(
+            { ...populationPreset, size },
+        );
 
         for (let i = 0; i < size; i++) {
             population[i] = createIndividual(susceptibilities[i], config);
@@ -65,7 +80,7 @@ const initPopulation = (size, config) => {
 };
 
 module.exports = ({
-    populationSize = 100,
+    populationSize,
     hygieneDisregard = 1,
     spreadRadius = 1,
     initialCarriers = [0],
@@ -77,13 +92,19 @@ module.exports = ({
     infectionPeriod = 41,
     // quarantinePeriod,
     // quarantineDelay,
+    populationPreset = 0,
 }) => {
 
     const config = {
         incubationPeriod,
         infectionPeriod,
+        populationPreset,
     };
 
+    // eslint-disable-next-line no-param-reassign
+    if (!populationSize) populationSize = populationPresets[populationPreset].size;
+
+    // eslint-disable-next-line no-param-reassign
     initialCarriers = [(populationSize / 2) + (Math.sqrt(populationSize) / 2)];
 
     const population = initPopulation(populationSize, config); // TODO pass S distribution to attribute S to each individual on setup
