@@ -1,4 +1,4 @@
-const { simulate } = require("./simulation");
+const { simulate, simulateStep } = require("./simulation");
 const init = require("./init");
 const MetricsService = require("./metrics");
 const initMetricCollectors = require("./metrics/collectors");
@@ -10,6 +10,7 @@ initMetricCollectors();
 module.exports = {
     init,
     simulate,
+    simulateStep,
     MetricsService,
     IndividualStates,
 };

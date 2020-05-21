@@ -14,9 +14,14 @@ const countHospitalized = (setData) => ({ hospitalized }) => {
     setData((data) => ([...data, hospitalized.length]));
 };
 
+const countHealthy = (setData) => ({ population, carriers, dead, cured }) => {
+    setData((data) => ([...data, population.length - (carriers.length + dead.length + cured.length)]));
+};
+
 module.exports = {
     countCarriers,
     countDead,
     countCured,
     countHospitalized,
+    countHealthy,
 };

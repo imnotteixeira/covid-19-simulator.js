@@ -8,7 +8,8 @@ const { contaminate } = require("./disease/transmission");
 const generateSusceptibilityDistribution = (size) => {
 
     // Hardcoding distribution, change later
-    const distribution = (x) => Math.exp(-Math.pow((x - (size / 2)), 2) / size);
+    const distribution = (x) => 0.5 * (x < (size / 2) ? x / (size / 2) : (-x + size) / (size / 2));
+    // const distribution = (x) => Math.exp(-Math.pow((x - (size / 2)), 2));
 
     return Array(size).fill(0).map((_, i) => distribution(i));
 
@@ -72,8 +73,8 @@ module.exports = ({
     // cureProbabilityFn,
     hospitalCapacity,
     hospitalEffectiveness,
-    incubationPeriod,
-    infectionPeriod,
+    incubationPeriod = 6,
+    infectionPeriod = 41,
     // quarantinePeriod,
     // quarantineDelay,
 }) => {
@@ -83,9 +84,12 @@ module.exports = ({
         infectionPeriod,
     };
 
+    initialCarriers = [(populationSize / 2) + (Math.sqrt(populationSize) / 2)];
+
     const population = initPopulation(populationSize, config); // TODO pass S distribution to attribute S to each individual on setup
 
     initialCarriers.forEach((carrier) => contaminate(population, carrier));
+
 
     return {
         population,
@@ -99,8 +103,9 @@ module.exports = ({
         hospitalEffectiveness,
         incubationPeriod,
         infectionPeriod,
+        step: 0,
+        ended: false,
         // confirmedCarriers: [],
-        // dead: [],
         // quarantined: [],
     };
 };

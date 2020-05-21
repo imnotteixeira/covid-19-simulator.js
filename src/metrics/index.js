@@ -3,6 +3,7 @@ class MetricsService {
         this.collectors = new Map();
         this.subscribedCollectors = new Set();
         this.metricsData = new Map();
+        this.initialMetricsData = new Map();
     }
 
     register(id, collector, initialData = null) {
@@ -12,6 +13,7 @@ class MetricsService {
 
         this.collectors.set(id, collector(dataSetter(id)));
         this.metricsData.set(id, initialData);
+        this.initialMetricsData.set(id, initialData);
     }
 
     collect(id, payload) {
@@ -40,6 +42,10 @@ class MetricsService {
             metrics.push({ id, data });
         });
         return metrics;
+    }
+
+    clear() {
+        this.initialMetricsData.forEach((data, id) => this.metricsData.set(id, data));
     }
 }
 
