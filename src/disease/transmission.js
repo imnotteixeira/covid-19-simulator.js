@@ -69,6 +69,7 @@ const propagateDisease = (population, carriers, quarantined, spreadRadius, hygie
         if (isHospitalized(population, carrier)) return;
 
         const targets = getContaminatedIndexes(population, spreadRadius, ...convertToXYCoord(carrier, Math.sqrt(population.length)));
+
         targets.forEach((target) => {
             // eslint-disable-next-line no-prototype-builtins
             if (!interactions.hasOwnProperty(target)) {
@@ -77,6 +78,9 @@ const propagateDisease = (population, carriers, quarantined, spreadRadius, hygie
             interactions[target].push(carrier);
         });
     });
+
+    const averageInteractions = Object.keys(interactions).length / carriers.length;
+    const oldCarrierCount = carriers.length;
 
     for (const target in interactions) {
         const sources = interactions[target];
@@ -97,6 +101,11 @@ const propagateDisease = (population, carriers, quarantined, spreadRadius, hygie
             contaminate(population, carriers, parseInt(target, 10));
         }
     }
+
+    return {
+        averageInteractions,
+        averageContaminations: (carriers.length - oldCarrierCount) / oldCarrierCount,
+    };
 };
 
 const calculateQuarantineContaminationProbability = (population, source, quarantineEffectiveness) =>

@@ -49,7 +49,10 @@ const simulateStep = (simulationState, maxSteps) => {
     updateCarriersDetails(population, carriers);
 
     simulationState.step++;
-    propagateDisease(population, carriers, quarantined, spreadRadius, hygieneDisregard, quarantineEffectiveness);
+    const {
+        averageInteractions,
+        averageContaminations,
+    } = propagateDisease(population, carriers, quarantined, spreadRadius, hygieneDisregard, quarantineEffectiveness);
 
     calculateOutcomes(population, carriers, dead, cured, hospitalized, hospitalEffectiveness);
 
@@ -70,6 +73,8 @@ const simulateStep = (simulationState, maxSteps) => {
     MetricsService.collect("cured-count", { cured });
     MetricsService.collect("hospitalized-count", { hospitalized });
     MetricsService.collect("healthy-count", { population, cured, dead, carriers });
+    MetricsService.collect("r0", { averageInteractions });
+    MetricsService.collect("r", { averageContaminations });
 
 
     if (maxSteps && step === maxSteps) {
