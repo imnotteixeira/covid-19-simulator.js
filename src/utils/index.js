@@ -30,7 +30,28 @@ const removeElemByValue = (arr, el) => {
     }
 };
 
-const removeCarrier = (carriers, i) => removeElemByValue(carriers, i);
+const pickNRandomIndices = (arr, n, filter) => {
+    let candidates = [];
+    if (typeof filter === "function") {
+        for (const personIdx in arr) {
+            if (filter(arr[personIdx])) candidates.push(personIdx);
+        }
+    } else {
+        candidates = Array.from(Array(arr.length).keys());
+    }
+
+    const result = [];
+    for (let i = 0; i < n && candidates.length > 0; i++) {
+        const randIndex = Math.floor(Math.random() * candidates.length);
+        result.push(parseInt(candidates.splice(randIndex, 1)[0], 10));
+    }
+    return result;
+};
+
+const removeCarrier = (carriers, confirmedCarriers, i) => {
+    removeElemByValue(carriers, i);
+    removeElemByValue(confirmedCarriers, i);
+};
 const removeHospitalized = (hospitalized, i) => removeElemByValue(hospitalized, i);
 const removeQuarantined = (quarantined, i) => removeElemByValue(quarantined, i);
 
@@ -47,4 +68,5 @@ module.exports = {
     removeCarrier,
     removeHospitalized,
     removeQuarantined,
+    pickNRandomIndices,
 };

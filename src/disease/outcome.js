@@ -27,7 +27,7 @@ const leaveHospital = (population, i, hospitalized) => {
     population[i].isHospitalized = false;
 };
 
-const calculateOutcomes = (population, carriers, dead, cured, hospitalized, hospitalEffectiveness) => {
+const calculateOutcomes = (population, carriers, dead, cured, hospitalized, hospitalEffectiveness, confirmedCarriers) => {
     population.forEach((individual, i) => {
         if (isContaminated(population, i)) {
 
@@ -37,12 +37,12 @@ const calculateOutcomes = (population, carriers, dead, cured, hospitalized, hosp
             const dieRandom = Math.random();
             if (dieRandom < deathProbability) {
                 kill(population, i, dead, hospitalized);
-                removeCarrier(carriers, i);
+                removeCarrier(carriers, confirmedCarriers, i);
             } else {
                 const cureRandom = Math.random();
                 if (cureRandom < individual.cureProbabilityFn(individual.daysSinceTransmission)) {
                     cure(population, i, cured, hospitalized);
-                    removeCarrier(carriers, i);
+                    removeCarrier(carriers, confirmedCarriers, i);
                 }
             }
         }

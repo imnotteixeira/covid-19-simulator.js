@@ -5,6 +5,9 @@ const {
     countHospitalized,
     countHealthy,
     countQuarantined,
+    countConfirmedCarriers,
+    countTotalTests,
+    countPositiveTests,
 } = require("./count");
 const { updateValue } = require("./update");
 
@@ -19,4 +22,7 @@ module.exports = () => {
     MetricsService.register("r0", updateValue("averageInteractions"), []);
     MetricsService.register("r", updateValue("averageContaminations"), []);
     MetricsService.register("quarantined-count", countQuarantined, []);
+    MetricsService.register("positive-test-count", countPositiveTests, []);
+    MetricsService.register("total-test-count", countTotalTests, []);
+    MetricsService.register("confirmed-carrier-count", countConfirmedCarriers, []);
 };

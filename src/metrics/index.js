@@ -40,7 +40,8 @@ class MetricsService {
     export() {
         const metrics = [];
         this.metricsData.forEach((data, id) => {
-            metrics.push({ id, data });
+            if (this.subscribedCollectors.has(id))
+                metrics.push({ id, data });
         });
         return metrics;
     }

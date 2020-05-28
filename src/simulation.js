@@ -1,6 +1,7 @@
 const { propagateDisease } = require("./disease/transmission");
 const { calculateOutcomes, updateCarriersDetails } = require("./disease/outcome");
 const { hospitalize } = require("./disease/hospitalize");
+const { test } = require("./disease/test");
 const { handleQuarantine } = require("./disease/quarantine");
 const MetricsService = require("./metrics");
 
@@ -22,6 +23,7 @@ const simulateStep = (simulationState, maxSteps) => {
     const {
         population,
         carriers,
+        confirmedCarriers,
         dead,
         cured,
         hospitalized,
@@ -36,6 +38,8 @@ const simulateStep = (simulationState, maxSteps) => {
         quarantineDelay,
         quarantineType,
         quarantinePercentage,
+        testRate,
+        testCooldown,
         step,
     } = simulationState;
 
@@ -54,7 +58,9 @@ const simulateStep = (simulationState, maxSteps) => {
         averageContaminations,
     } = propagateDisease(population, carriers, quarantined, spreadRadius, hygieneDisregard, quarantineEffectiveness);
 
-    calculateOutcomes(population, carriers, dead, cured, hospitalized, hospitalEffectiveness);
+    calculateOutcomes(population, carriers, dead, cured, hospitalized, hospitalEffectiveness, confirmedCarriers);
+
+    const { newTests, newPositiveTests } = test(population, confirmedCarriers, testRate, testCooldown, step);
 
     hospitalize(population, carriers, hospitalized, hospitalCapacity, incubationPeriod);
 
@@ -69,9 +75,11 @@ const simulateStep = (simulationState, maxSteps) => {
     });
 
     MetricsService.collect({
-        simulationState,
+        ...simulationState,
         averageInteractions,
         averageContaminations,
+        newTests,
+        newPositiveTests,
     });
 
 

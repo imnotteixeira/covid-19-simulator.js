@@ -22,6 +22,18 @@ const countQuarantined = (setData) => ({ quarantined }) => {
     setData((data) => ([...data, quarantined.length]));
 };
 
+const countConfirmedCarriers = (setData) => ({ confirmedCarriers }) => {
+    setData((data) => ([...data, confirmedCarriers.length]));
+};
+
+const countTotalTests = (setData) => ({ newTests }) => {
+    setData((data) => ([...data, newTests]));
+};
+
+const countPositiveTests = (setData) => ({ newPositiveTests }) => {
+    setData((data) => ([...data, newPositiveTests]));
+};
+
 module.exports = {
     countCarriers,
     countDead,
@@ -29,4 +41,7 @@ module.exports = {
     countHospitalized,
     countHealthy,
     countQuarantined,
+    countConfirmedCarriers,
+    countTotalTests,
+    countPositiveTests,
 };

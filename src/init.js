@@ -56,6 +56,7 @@ const createIndividual = (susceptibility, config) => {
         isHospitalized: false,
         isQuarantined: false,
         quarantineStart: -1,
+        lastTestedOnDay: -1,
     };
 };
 
@@ -81,25 +82,48 @@ const initPopulation = (size, config) => {
     }
 };
 
-module.exports = ({
-    populationSize,
-    hygieneDisregard = 1,
-    spreadRadius = 1,
-    initialCarriers = [0],
-    // deathProbablityFn,
-    // cureProbabilityFn,
-    hospitalCapacity,
-    hospitalEffectiveness,
-    incubationPeriod = 6,
-    infectionPeriod = 41,
-    populationPreset = 0,
-    // QUARANTINE
-    quarantineEffectiveness,
-    quarantinePeriod,
-    quarantineDelay,
+const validateInput = ({
     quarantineType,
     quarantinePercentage,
+    populationSize,
+    testRate,
 }) => {
+    // eslint-disable-next-line no-prototype-builtins
+    if (quarantineType !== "" && !QuarantineTypes.hasOwnProperty(quarantineType)) {
+        throw new Error(`Trying to use invalid Quarantine Type = ${quarantineType}.`);
+    } if (quarantineType === QuarantineTypes.FIXED_PERCENTAGE && !quarantinePercentage) {
+        throw new Error("Trying to use Quarantine Type = Fixed Percentage, but no Quarantine Percentage set.");
+    } if (quarantinePercentage && quarantineType !== QuarantineTypes.FIXED_PERCENTAGE) {
+        console.warn(`Set quarantine percentage, but the quarantine type is ${quarantineType}, you probably forgot to change it.`);
+    } if (testRate > populationSize) {
+        throw new Error("Test rate can't be higher than population size!");
+    }
+};
+
+module.exports = (inputData) => {
+
+    let {
+        populationSize,
+        hygieneDisregard = 1,
+        spreadRadius = 1,
+        initialCarriers = [0],
+        // deathProbablityFn,
+        // cureProbabilityFn,
+        hospitalCapacity,
+        hospitalEffectiveness,
+        incubationPeriod = 6,
+        infectionPeriod = 41,
+        populationPreset = 0,
+        // QUARANTINE
+        quarantineEffectiveness,
+        quarantinePeriod,
+        quarantineDelay,
+        quarantineType,
+        quarantinePercentage,
+        // TEST
+        testRate = 0,
+        testCooldown = 7,
+    } = inputData;
 
     const config = {
         incubationPeriod,
@@ -107,18 +131,7 @@ module.exports = ({
         populationPreset,
     };
 
-    // eslint-disable-next-line no-prototype-builtins
-    if (quarantineType !== "" && !QuarantineTypes.hasOwnProperty(quarantineType)) {
-        throw new Error(`Trying to use invalid Quarantine Type = ${quarantineType}.`);
-    }
-
-    if (quarantineType === QuarantineTypes.FIXED_PERCENTAGE && !quarantinePercentage) {
-        throw new Error("Trying to use Quarantine Type = Fixed Percentage, but no Quarantine Percentage set.");
-    }
-
-    if (quarantinePercentage && quarantineType !== QuarantineTypes.FIXED_PERCENTAGE) {
-        console.warn(`Set quarantine percentage, but the quarantine type is ${quarantineType}, you probably forgot to change it.`);
-    }
+    validateInput(inputData);
 
     // eslint-disable-next-line no-param-reassign
     if (!populationSize) populationSize = populationPresets[populationPreset].size;
@@ -134,6 +147,7 @@ module.exports = ({
     return {
         population,
         carriers,
+        confirmedCarriers: [],
         dead: [],
         cured: [],
         hospitalized: [],
@@ -152,5 +166,7 @@ module.exports = ({
         quarantineType,
         quarantinePercentage,
         quarantined: [],
+        testRate,
+        testCooldown,
     };
 };
