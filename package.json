@@ -1,6 +1,6 @@
 {
   "name": "@imnotteixeira/covid-19-simulator",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A Simulator for the COVID-19 epidemic, to analyse measures effectiveness.",
   "main": "src/index.js",
   "scripts": {

@@ -13,6 +13,8 @@ const { updateValue } = require("./update");
 
 const MetricsService = require("./index");
 
+console.log("lfdakfsldfddf", updateValue("averageInteractions"));
+
 module.exports = () => {
     MetricsService.register("carrier-count", countCarriers, []);
     MetricsService.register("dead-count", countDead, []);

@@ -49,10 +49,19 @@ const handleFixedQuarantine = ({
 const handleConfirmedCarriersQuarantine = ({
     population,
     quarantined,
-    quarantinePeriod,
-    quarantineDelay,
+    confirmedCarriers,
 }) => {
-    // TODO
+    // They will stay quarantined as long as they are confirmed carriers,
+    // therefore the arrays will always have the same elements
+
+    // Clear quarantined
+    quarantined.splice(0);
+
+    confirmedCarriers.slice().forEach((i) => quarantined.push(i));
+
+    for (const quarantinedIdx of quarantined) {
+        population[quarantinedIdx].isQuarantined = true;
+    }
 };
 
 

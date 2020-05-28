@@ -72,6 +72,7 @@ const simulateStep = (simulationState, maxSteps) => {
         quarantineDelay,
         quarantineType,
         quarantinePercentage,
+        confirmedCarriers,
     });
 
     MetricsService.collect({
