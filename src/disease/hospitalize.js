@@ -6,7 +6,10 @@ const hospitalize = (population, carriers, hospitalized, hospitalCapacity, incub
     const availableSpots = hospitalCapacity - hospitalized.length;
 
     carriers
-        .filter((carrier) => population[carrier].daysSinceTransmission >= incubationPeriod)
+        .filter((carrier) =>
+            carrier.state === IndividualStates.CONFIRMED_CARRIER ||
+            population[carrier].daysSinceTransmission >= incubationPeriod,
+        )
         .sort((carrierA, carrierB) => {
             if (population[carrierA].state === IndividualStates.CONFIRMED_CARRIER
                 && population[carrierB].state === IndividualStates.CARRIER) return 1;
