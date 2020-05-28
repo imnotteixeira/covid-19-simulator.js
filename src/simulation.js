@@ -68,13 +68,11 @@ const simulateStep = (simulationState, maxSteps) => {
         quarantinePercentage,
     });
 
-    MetricsService.collect("carrier-count", { carriers });
-    MetricsService.collect("dead-count", { dead });
-    MetricsService.collect("cured-count", { cured });
-    MetricsService.collect("hospitalized-count", { hospitalized });
-    MetricsService.collect("healthy-count", { population, cured, dead, carriers });
-    MetricsService.collect("r0", { averageInteractions });
-    MetricsService.collect("r", { averageContaminations });
+    MetricsService.collect({
+        simulationState,
+        averageInteractions,
+        averageContaminations,
+    });
 
 
     if (maxSteps && step === maxSteps) {

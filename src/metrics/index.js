@@ -16,9 +16,10 @@ class MetricsService {
         this.initialMetricsData.set(id, initialData);
     }
 
-    collect(id, payload) {
-        if (!this.subscribedCollectors.has(id)) return;
-        else this.collectors.get(id)(payload);
+    collect(payload) {
+        for (const collectorId of this.subscribedCollectors) {
+            this.collectors.get(collectorId)(payload);
+        }
     }
 
     subscribe(id) {
