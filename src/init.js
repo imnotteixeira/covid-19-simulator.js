@@ -87,6 +87,8 @@ const validateInput = ({
     quarantinePercentage,
     populationSize,
     testRate,
+    incubationPeriod,
+    infectionPeriod,
 }) => {
     // eslint-disable-next-line no-prototype-builtins
     if (quarantineType !== "" && !QuarantineTypes.hasOwnProperty(quarantineType)) {
@@ -97,6 +99,8 @@ const validateInput = ({
         console.warn(`Set quarantine percentage, but the quarantine type is ${quarantineType}, you probably forgot to change it.`);
     } if (testRate > populationSize) {
         throw new Error("Test rate can't be higher than population size!");
+    } if (incubationPeriod >= infectionPeriod) {
+        throw new Error("Incubation period must be less than the infection period");
     }
 };
 
