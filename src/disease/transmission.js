@@ -87,7 +87,7 @@ const propagateDisease = (population, carriers, quarantined, spreadRadius, hygie
 
         const probabilityNotContaminated = sources.reduce((acc, source) =>
             // Takes into account source quarantine
-            acc * calculateQuarantineContaminationProbability(population, source, quarantineEffectiveness),
+            acc * (1 - calculateQuarantineContaminationProbability(population, source, quarantineEffectiveness)),
         1);
 
         // Takes into account target quarantine
@@ -109,7 +109,7 @@ const propagateDisease = (population, carriers, quarantined, spreadRadius, hygie
 };
 
 const calculateQuarantineContaminationProbability = (population, source, quarantineEffectiveness) =>
-    (1 - isQuarantined(population, source) ? (1 - quarantineEffectiveness) : 1);
+    (isQuarantined(population, source) ? (1 - quarantineEffectiveness) : 1);
 
 module.exports = {
     propagateDisease,
