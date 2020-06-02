@@ -1,7 +1,7 @@
 const { IndividualStates } = require("./utils");
 const { QuarantineTypes } = require("./disease/quarantine");
 const { contaminate } = require("./disease/transmission");
-const populationPresets = require("./population_presets");
+const { PopulationPresets } = require("./presets");
 
 /**
  * Generates size values of S, according to distribution
@@ -64,7 +64,7 @@ const initPopulation = (size, config) => {
     if (size > 0 && Math.sqrt(size) % 1 === 0) {
         const population = [];
 
-        const populationPreset = populationPresets[config.populationPreset];
+        const populationPreset = PopulationPresets[config.populationPreset];
 
 
         const susceptibilities = generatePopulationSusceptibility(
@@ -138,7 +138,7 @@ module.exports = (inputData) => {
     validateInput(inputData);
 
     // eslint-disable-next-line no-param-reassign
-    if (!populationSize) populationSize = populationPresets[populationPreset].size;
+    if (!populationSize) populationSize = PopulationPresets[populationPreset].size;
 
     // eslint-disable-next-line no-param-reassign
     initialCarriers = [(populationSize / 2) + (Math.sqrt(populationSize) / 2)];
