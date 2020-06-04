@@ -8,6 +8,7 @@ const {
     countConfirmedCarriers,
     countTotalTests,
     countPositiveTests,
+    updateCarriersHistory,
 } = require("./count");
 const { updateValue } = require("./update");
 
@@ -25,4 +26,5 @@ module.exports = () => {
     MetricsService.register("positive-test-count", countPositiveTests, []);
     MetricsService.register("total-test-count", countTotalTests, []);
     MetricsService.register("confirmed-carrier-count", countConfirmedCarriers, []);
+    MetricsService.register("carriers-history", updateCarriersHistory, []);
 };
