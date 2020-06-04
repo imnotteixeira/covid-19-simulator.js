@@ -1,3 +1,5 @@
+const { isContaminated } = require("../utils/index");
+
 const countCarriers = (setData) => ({ carriers }) => {
     setData((data) => ([...data, carriers.length]));
 };
@@ -34,6 +36,10 @@ const countPositiveTests = (setData) => ({ newPositiveTests }) => {
     setData((data) => ([...data, newPositiveTests]));
 };
 
+const updateCarriersHistory = (setData) => ({ population }) => {
+    setData((data) => ([...data, population.map((_, i) => isContaminated(population, i) ? 1 : 0)]));
+};
+
 module.exports = {
     countCarriers,
     countDead,
@@ -44,4 +50,5 @@ module.exports = {
     countConfirmedCarriers,
     countTotalTests,
     countPositiveTests,
+    updateCarriersHistory,
 };
