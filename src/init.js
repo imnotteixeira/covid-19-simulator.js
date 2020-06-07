@@ -140,8 +140,9 @@ module.exports = (inputData) => {
     // eslint-disable-next-line no-param-reassign
     if (!populationSize) populationSize = PopulationPresets[populationPreset].size;
 
+    const matrixSide = Math.sqrt(populationSize);
     // eslint-disable-next-line no-param-reassign
-    initialCarriers = [(populationSize / 2) + (Math.sqrt(populationSize) / 2)];
+    initialCarriers = [((Math.floor(matrixSide / 2)) * matrixSide) + (matrixSide / 2)];
 
     const population = initPopulation(populationSize, config); // TODO pass S distribution to attribute S to each individual on setup
 

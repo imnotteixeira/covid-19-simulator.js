@@ -19,27 +19,17 @@ const contaminate = (population, carriers, i) => {
 // This can be memoized
 const getAffectedCoords = (line, col, spreadRadius, matrixSide) => {
     const affected = [];
-    for (let i = 1; i <= spreadRadius; i++) {
-        for (let j = 1; j <= spreadRadius; j++) {
-            // vertical
-            affected.push([line + i, col]);
-            affected.push([line - i, col]);
-            // horizontal
-            affected.push([line, col - j]);
-            affected.push([line, col + j]);
-            // diagonals
-            affected.push([line - i, col - j]);
-            affected.push([line - i, col + j]);
-            affected.push([line + i, col - j]);
-            affected.push([line + i, col + j]);
+    for (let x = col - spreadRadius; x <= col + spreadRadius; x++) {
+        for (let y = line - spreadRadius; y <= line + spreadRadius; y++) {
+            if (x >= 0
+                && x < matrixSide
+                && y >= 0
+                && y < matrixSide
+                && !(x === line && y === col))
+                affected.push([y, x]);
         }
     }
-    return affected.filter(([x, y]) =>
-        x >= 0
-        && x < matrixSide
-        && y >= 0
-        && y < matrixSide,
-    );
+    return affected;
 };
 
 const isViableTarget = (population, i) =>
