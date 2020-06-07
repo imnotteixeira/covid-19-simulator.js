@@ -1,6 +1,6 @@
 {
   "name": "@imnotteixeira/covid-19-simulator",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "A Simulator for the COVID-19 epidemic, to analyse measures effectiveness.",
   "main": "src/index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "homepage": "https://github.com/imnotteixeira/covid-19-simulator.js#readme",
   "devDependencies": {
     "eslint": "^6.8.0",
-    "np": "^6.2.2"
+    "np": "^6.2.3"
   },
   "dependencies": {}
 }
