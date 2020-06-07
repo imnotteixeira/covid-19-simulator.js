@@ -6,20 +6,15 @@ const { handleQuarantine } = require("./disease/quarantine");
 const MetricsService = require("./metrics");
 
 const simulate = (simulationState, maxSteps, hooks) => {
-    const {
-        stepEnd = () => {},
-    } = hooks;
 
     console.info(`Simulating${maxSteps ? ` with max steps = ${maxSteps}` : ""}...`);
 
-
     while (!simulationState.ended) {
-        simulateStep(simulationState, maxSteps);
-        stepEnd(simulationState);
+        simulateStep(simulationState, maxSteps, hooks);
     }
 };
 
-const simulateStep = (simulationState, maxSteps) => {
+const simulateStep = (simulationState, maxSteps, hooks) => {
     const {
         population,
         carriers,
@@ -42,6 +37,22 @@ const simulateStep = (simulationState, maxSteps) => {
         testCooldown,
         step,
     } = simulationState;
+
+    const {
+        onSimulationStart = () => {},
+        stepEnd = () => {},
+    } = (hooks ? hooks : {});
+
+    if (step === 0) {
+        onSimulationStart(simulationState);
+        MetricsService.collect({
+            ...simulationState,
+            averageInteractions: 0,
+            averageContaminations: 0,
+            newTests: 0,
+            newPositiveTests: 0,
+        });
+    }
 
     // UPDATE THIS ONCE THERE ARE CONFIRMED CARRIERS AS WELL
     if (carriers.length === 0) {
@@ -83,6 +94,7 @@ const simulateStep = (simulationState, maxSteps) => {
         newPositiveTests,
     });
 
+    stepEnd(simulationState);
 
     if (maxSteps && step === maxSteps) {
         console.warn(`Maximum steps reached (${maxSteps}), Stopping simulation...`);
