@@ -3,6 +3,7 @@
 // This can be memoized
 const convertToLinearCoord = ([line, col], matrixSide) => (line * matrixSide) + col;
 const convertToXYCoord = (index, matrixSide) => ([Math.floor(index / matrixSide), index % matrixSide]);
+const isWithinBounds = (y, x, matrixSide) => ((x >= 0) && (x < matrixSide) && (y >= 0) && (y < matrixSide));
 
 const IndividualStates = Object.freeze({
     HEALTHY: "HEALTHY",
@@ -60,6 +61,7 @@ module.exports = {
     IndividualStates,
     convertToLinearCoord,
     convertToXYCoord,
+    isWithinBounds,
     isDead,
     isCured,
     isContaminated,
