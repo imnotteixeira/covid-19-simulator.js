@@ -3,6 +3,7 @@ const { calculateOutcomes, updateCarriersDetails } = require("./disease/outcome"
 const { hospitalize } = require("./disease/hospitalize");
 const { test } = require("./disease/test");
 const { handleQuarantine } = require("./disease/quarantine");
+const { handleZoneIsolation } = require("./disease/zoning");
 const MetricsService = require("./metrics");
 
 const simulate = (simulationState, maxSteps, hooks) => {
@@ -36,6 +37,8 @@ const simulateStep = (simulationState, maxSteps, hooks) => {
         testRate,
         testCooldown,
         step,
+        isolatedZones,
+        zoneIsolationThreshold,
     } = simulationState;
 
     const {
@@ -72,6 +75,8 @@ const simulateStep = (simulationState, maxSteps, hooks) => {
     calculateOutcomes(population, carriers, dead, cured, hospitalized, hospitalEffectiveness, confirmedCarriers);
 
     const { newTests, newPositiveTests } = test(population, confirmedCarriers, testRate, testCooldown, step);
+
+    handleZoneIsolation(population, confirmedCarriers, isolatedZones, zoneIsolationThreshold);
 
     hospitalize(population, carriers, hospitalized, hospitalCapacity, incubationPeriod);
 

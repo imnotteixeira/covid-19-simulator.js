@@ -1,8 +1,7 @@
-const { IndividualStates } = require("./utils");
+const { IndividualStates, convertToXYCoord, convertToLinearCoord } = require("./utils");
 const { QuarantineTypes } = require("./disease/quarantine");
 const { contaminate } = require("./disease/transmission");
 const { PopulationPresets } = require("./presets");
-
 /**
  * Generates size values of S, according to distribution
  * @param {*} size Number of people
@@ -42,7 +41,7 @@ const generateCureProbabilityFunction = (susceptibility) => (day) => {
     return 1 / (1 + Math.exp(-(day / ((0.5 * susceptibility) + 1)) + 11));
 };
 
-const createIndividual = (susceptibility, config) => {
+const createIndividual = (susceptibility, config, zoneNumber) => {
     const deathProbabilityFn = generateDeathProbabilityFunction(susceptibility, config);
     const cureProbabilityFn = generateCureProbabilityFunction(susceptibility);
 
@@ -57,6 +56,7 @@ const createIndividual = (susceptibility, config) => {
         isQuarantined: false,
         quarantineStart: -1,
         lastTestedOnDay: -1,
+        zone: zoneNumber,
     };
 };
 
@@ -71,8 +71,12 @@ const initPopulation = (size, config) => {
             { ...populationPreset, size },
         );
 
+        const zoneSide = Math.sqrt(size) / Math.sqrt(config.numberOfZones);
+
         for (let i = 0; i < size; i++) {
-            population[i] = createIndividual(susceptibilities[i], config);
+            const zoneCoords = convertToXYCoord(i, Math.sqrt(size)).map((elem) => Math.floor(elem / zoneSide));
+            const zoneNumber = convertToLinearCoord(zoneCoords, Math.sqrt(config.numberOfZones));
+            population[i] = createIndividual(susceptibilities[i], config, zoneNumber);
         }
 
         return population;
@@ -80,6 +84,7 @@ const initPopulation = (size, config) => {
     } else {
         throw new Error("Population Size must be a perfect square");
     }
+
 };
 
 const validateInput = ({
@@ -127,12 +132,15 @@ module.exports = (inputData) => {
         // TEST
         testRate = 0,
         testCooldown = 7,
+        numberOfZones = 1,
+        zoneIsolationThreshold,
     } = inputData;
 
     const config = {
         incubationPeriod,
         infectionPeriod,
         populationPreset,
+        numberOfZones,
     };
 
     validateInput(inputData);
@@ -173,5 +181,8 @@ module.exports = (inputData) => {
         quarantined: [],
         testRate,
         testCooldown,
+        numberOfZones,
+        isolatedZones: Array(numberOfZones).fill(false),
+        zoneIsolationThreshold,
     };
 };
