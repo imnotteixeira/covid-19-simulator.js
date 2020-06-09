@@ -133,7 +133,7 @@ module.exports = (inputData) => {
         testRate = 0,
         testCooldown = 7,
         numberOfZones = 1,
-        zoneIsolationThreshold,
+        zoneIsolationThreshold = 0.5,
     } = inputData;
 
     const config = {

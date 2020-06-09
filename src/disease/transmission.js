@@ -2,6 +2,7 @@ const {
     IndividualStates,
     convertToLinearCoord,
     convertToXYCoord,
+    isWithinBounds,
     isContaminated,
     isDead,
     isCured,
@@ -17,15 +18,19 @@ const contaminate = (population, carriers, i) => {
 };
 
 // This can be memoized
-const getAffectedCoords = (line, col, spreadRadius, matrixSide) => {
+const getAffectedCoords = (line, col, spreadRadius, matrixSide, isolatedZones, population) => {
     const affected = [];
     for (let x = col - spreadRadius; x <= col + spreadRadius; x++) {
         for (let y = line - spreadRadius; y <= line + spreadRadius; y++) {
-            if (x >= 0
-                && x < matrixSide
-                && y >= 0
-                && y < matrixSide
-                && !(x === line && y === col))
+            if (!isWithinBounds(y, x, matrixSide)) continue;
+
+            const distance = Math.sqrt(Math.pow(x - col, 2) + Math.pow(y - line, 2));
+            const sourceZone = population[convertToLinearCoord([line, col], matrixSide)].zone;
+            const targetZone = population[convertToLinearCoord([y, x], matrixSide)].zone;
+            if (!(x === line && y === col)
+                && ((sourceZone === targetZone) || (!isolatedZones[sourceZone] && !isolatedZones[targetZone]))
+                && ((1 - (distance / (spreadRadius + 1))) < Math.random())
+            )
                 affected.push([y, x]);
         }
     }
@@ -37,16 +42,16 @@ const isViableTarget = (population, i) =>
     && !isDead(population, i)
     && !isCured(population, i);
 
-const getContaminatedIndexes = (population, spreadRadius, line, col) => {
+const getContaminatedIndexes = (population, spreadRadius, line, col, isolatedZones) => {
 
     const matrixSide = Math.sqrt(population.length);
-    return getAffectedCoords(line, col, spreadRadius, matrixSide)
+    return getAffectedCoords(line, col, spreadRadius, matrixSide, isolatedZones, population)
         .map((c) => convertToLinearCoord(c, matrixSide))
         .filter((i) => isViableTarget(population, i));
 };
 
 
-const propagateDisease = (population, carriers, quarantined, spreadRadius, hygieneDisregard, quarantineEffectiveness) => {
+const propagateDisease = (population, carriers, quarantined, spreadRadius, hygieneDisregard, quarantineEffectiveness, isolatedZones) => {
 
     /**
      * Format: {
@@ -58,7 +63,7 @@ const propagateDisease = (population, carriers, quarantined, spreadRadius, hygie
     carriers.forEach((carrier) => {
         if (isHospitalized(population, carrier)) return;
 
-        const targets = getContaminatedIndexes(population, spreadRadius, ...convertToXYCoord(carrier, Math.sqrt(population.length)));
+        const targets = getContaminatedIndexes(population, spreadRadius, ...convertToXYCoord(carrier, Math.sqrt(population.length)), isolatedZones);
 
         targets.forEach((target) => {
             // eslint-disable-next-line no-prototype-builtins

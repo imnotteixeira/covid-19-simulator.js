@@ -70,7 +70,7 @@ const simulateStep = (simulationState, maxSteps, hooks) => {
     const {
         averageInteractions,
         averageContaminations,
-    } = propagateDisease(population, carriers, quarantined, spreadRadius, hygieneDisregard, quarantineEffectiveness);
+    } = propagateDisease(population, carriers, quarantined, spreadRadius, hygieneDisregard, quarantineEffectiveness, isolatedZones);
 
     calculateOutcomes(population, carriers, dead, cured, hospitalized, hospitalEffectiveness, confirmedCarriers);
 
