@@ -12,6 +12,6 @@ module.exports = {
     quarantineEffectiveness: 0.3,
     quarantineDelay: 0,
     quarantinePeriod: 15,
-    populationPreset: 0, // GERMANY
+    populationPreset: "GERMANY",
     label: "Control",
 };
