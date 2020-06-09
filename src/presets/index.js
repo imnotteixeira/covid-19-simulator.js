@@ -47,7 +47,7 @@ const SimulationPresets = Object.freeze({
  * }
  *
  */
-const PopulationPresets = [SPAIN, ITALY, GERMANY];
+const PopulationPresets = Object.freeze({ SPAIN, ITALY, GERMANY });
 
 module.exports = {
     SimulationPresets,
