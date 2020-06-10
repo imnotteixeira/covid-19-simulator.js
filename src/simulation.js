@@ -60,7 +60,6 @@ const simulateStep = (simulationState, maxSteps, hooks) => {
         });
     }
 
-    // UPDATE THIS ONCE THERE ARE CONFIRMED CARRIERS AS WELL
     if (carriers.length === 0) {
         console.warn("No carriers left, Stopping simulation...");
         simulationState.ended = true;

@@ -1,6 +1,8 @@
 const { IndividualStates, convertToXYCoord, convertToLinearCoord, pickNRandomIndices } = require("./utils");
 const { QuarantineTypes } = require("./disease/quarantine");
+const { validateInput } = require("./input");
 const { contaminate } = require("./disease/transmission");
+const { QuarantineTypes } = require("./disease/quarantine");
 const { PopulationPresets } = require("./presets");
 /**
  * Generates size values of S, according to distribution
@@ -106,48 +108,26 @@ const initPopulation = (size, config) => {
 
 };
 
-const validateInput = ({
-    quarantineType,
-    quarantinePercentage,
-    populationSize,
-    testRate,
-    incubationPeriod,
-    infectionPeriod,
-}) => {
-    // eslint-disable-next-line no-prototype-builtins
-    if (quarantineType !== "" && !QuarantineTypes.hasOwnProperty(quarantineType)) {
-        throw new Error(`Trying to use invalid Quarantine Type = ${quarantineType}.`);
-    } if (quarantineType === QuarantineTypes.FIXED_PERCENTAGE && !quarantinePercentage) {
-        throw new Error("Trying to use Quarantine Type = Fixed Percentage, but no Quarantine Percentage set.");
-    } if (quarantinePercentage && quarantineType !== QuarantineTypes.FIXED_PERCENTAGE) {
-        console.warn(`Set quarantine percentage, but the quarantine type is ${quarantineType}, you probably forgot to change it.`);
-    } if (testRate > populationSize) {
-        throw new Error("Test rate can't be higher than population size!");
-    } if (incubationPeriod >= infectionPeriod) {
-        throw new Error("Incubation period must be less than the infection period");
-    }
-};
-
 module.exports = (inputData) => {
 
     let {
-        populationSize,
+        populationSize = 100,
         hygieneDisregard = 1,
         spreadRadius = 1,
         initialCarriers = [0],
         // deathProbablityFn,
         // cureProbabilityFn,
-        hospitalCapacity,
-        hospitalEffectiveness,
+        hospitalCapacity = 0,
+        hospitalEffectiveness = 0,
         incubationPeriod = 6,
         infectionPeriod = 41,
         populationPreset = 0,
         // QUARANTINE
-        quarantineEffectiveness,
-        quarantinePeriod,
-        quarantineDelay,
-        quarantineType,
-        quarantinePercentage,
+        quarantineEffectiveness = 1,
+        quarantinePeriod = 1,
+        quarantineDelay = 1,
+        quarantineType = QuarantineTypes.NONE,
+        quarantinePercentage = 0,
         // TEST
         testRate = 0,
         testCooldown = 7,
@@ -214,7 +194,6 @@ module.exports = (inputData) => {
         infectionPeriod,
         step: 0,
         ended: false,
-        // confirmedCarriers: [],
         quarantineEffectiveness,
         quarantinePeriod,
         quarantineDelay,
