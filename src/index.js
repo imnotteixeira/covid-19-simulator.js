@@ -6,6 +6,7 @@ const { IndividualStates } = require("./utils");
 const { SimulationPresets } = require("./presets");
 const { QuarantineTypes } = require("./disease/quarantine");
 const { ZoneIsolationBehaviors } = require("./disease/zoning");
+const { InputSchema } = require("./input");
 
 // Registers the default metric collectors
 initMetricCollectors();
@@ -19,4 +20,5 @@ module.exports = {
     QuarantineTypes,
     SimulationPresets,
     ZoneIsolationBehaviors,
+    InputSchema,
 };
