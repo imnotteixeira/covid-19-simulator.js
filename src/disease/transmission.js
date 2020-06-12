@@ -28,7 +28,7 @@ const getAffectedCoords = (line, col, spreadRadius, matrixSide, isolatedZones, p
             const sourceZone = population[convertToLinearCoord([line, col], matrixSide)].zone;
             const targetZone = population[convertToLinearCoord([y, x], matrixSide)].zone;
             if (!(x === line && y === col)
-                && ((sourceZone === targetZone) || (!isolatedZones[sourceZone] && !isolatedZones[targetZone]))
+                && ((sourceZone === targetZone) || (!isolatedZones[sourceZone].isIsolated && !isolatedZones[targetZone].isIsolated))
                 && ((1 - (distance / (spreadRadius + 1))) < Math.random())
             )
                 affected.push([y, x]);
