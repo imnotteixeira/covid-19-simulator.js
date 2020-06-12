@@ -1,5 +1,6 @@
 const { IndividualStates, convertToXYCoord, convertToLinearCoord } = require("./utils");
 const { QuarantineTypes } = require("./disease/quarantine");
+const { ZoneIsolationBehaviors } = require("./disease/zoning");
 const { contaminate } = require("./disease/transmission");
 const { PopulationPresets } = require("./presets");
 /**
@@ -132,8 +133,11 @@ module.exports = (inputData) => {
         // TEST
         testRate = 0,
         testCooldown = 7,
+        // ZONING
         numberOfZones = 1,
         zoneIsolationThreshold = 0.5,
+        zoneIsolationTimeout = 0,
+        zoneIsolationBehavior = "BASIC",
     } = inputData;
 
     const config = {
@@ -156,6 +160,15 @@ module.exports = (inputData) => {
 
     const carriers = [];
     initialCarriers.forEach((carrier) => contaminate(population, carriers, carrier));
+
+    const isolatedZones = [];
+    for (let zone = 0; zone < numberOfZones; zone++) {
+        isolatedZones[zone] = {
+            isIsolated: false,
+            isolationUnnecessarySinceStep: -1,
+        };
+
+    }
 
     return {
         population,
@@ -182,7 +195,9 @@ module.exports = (inputData) => {
         testRate,
         testCooldown,
         numberOfZones,
-        isolatedZones: Array(numberOfZones).fill(false),
+        isolatedZones,
         zoneIsolationThreshold,
+        zoneIsolationBehavior,
+        zoneIsolationTimeout,
     };
 };
