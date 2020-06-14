@@ -1,7 +1,8 @@
 const { pickNRandomIndices, IndividualStates } = require("../utils");
 
 const canBeTested = (cooldown) => (person) =>
-    person.state !== IndividualStates.CONFIRMED_CARRIER
+    !person.isDummy
+    && person.state !== IndividualStates.CONFIRMED_CARRIER
     && person.state !== IndividualStates.DEAD
     && person.state !== IndividualStates.CURED
     && !person.isHospitalized

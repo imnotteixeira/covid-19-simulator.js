@@ -22,7 +22,10 @@ const getAffectedCoords = (line, col, spreadRadius, matrixSide, isolatedZones, p
     const affected = [];
     for (let x = col - spreadRadius; x <= col + spreadRadius; x++) {
         for (let y = line - spreadRadius; y <= line + spreadRadius; y++) {
-            if (!isWithinBounds(y, x, matrixSide)) continue;
+            if (
+                !isWithinBounds(y, x, matrixSide)
+                || population[convertToLinearCoord([line, col], matrixSide)].isDummy
+            ) continue; // Ignore out of bounds coordinates and dummy elements (population density)
 
             const distance = Math.sqrt(Math.pow(x - col, 2) + Math.pow(y - line, 2));
             const sourceZone = population[convertToLinearCoord([line, col], matrixSide)].zone;
@@ -63,7 +66,12 @@ const propagateDisease = (population, carriers, quarantined, spreadRadius, hygie
     carriers.forEach((carrier) => {
         if (isHospitalized(population, carrier)) return;
 
-        const targets = getContaminatedIndexes(population, spreadRadius, ...convertToXYCoord(carrier, Math.sqrt(population.length)), isolatedZones);
+        const targets = getContaminatedIndexes(
+            population,
+            spreadRadius,
+            ...convertToXYCoord(carrier, Math.sqrt(population.length)),
+            isolatedZones,
+        );
 
         targets.forEach((target) => {
             // eslint-disable-next-line no-prototype-builtins
