@@ -1,6 +1,5 @@
-const { IndividualStates, convertToXYCoord, convertToLinearCoord } = require("./utils");
+const { IndividualStates, convertToXYCoord, convertToLinearCoord, pickNRandomIndices } = require("./utils");
 const { QuarantineTypes } = require("./disease/quarantine");
-const { ZoneIsolationBehaviors } = require("./disease/zoning");
 const { contaminate } = require("./disease/transmission");
 const { PopulationPresets } = require("./presets");
 /**
@@ -42,7 +41,7 @@ const generateCureProbabilityFunction = (susceptibility) => (day) => {
     return 1 / (1 + Math.exp(-(day / ((0.5 * susceptibility) + 1)) + 11));
 };
 
-const createIndividual = (susceptibility, config, zoneNumber) => {
+const createIndividual = (susceptibility, config, zoneNumber, isDummy) => {
     const deathProbabilityFn = generateDeathProbabilityFunction(susceptibility, config);
     const cureProbabilityFn = generateCureProbabilityFunction(susceptibility);
 
@@ -58,12 +57,13 @@ const createIndividual = (susceptibility, config, zoneNumber) => {
         quarantineStart: -1,
         lastTestedOnDay: -1,
         zone: zoneNumber,
+        isDummy,
     };
 };
 
 const initPopulation = (size, config) => {
     if (size > 0 && Math.sqrt(size) % 1 === 0) {
-        const population = [];
+        const population = Array(size);
 
         const populationPreset = PopulationPresets[config.populationPreset];
 
@@ -74,10 +74,20 @@ const initPopulation = (size, config) => {
 
         const zoneSide = Math.sqrt(size) / Math.sqrt(config.numberOfZones);
 
+        let dummyIndividuals = Array(size).fill(false);
+        if (config.disabledIndividualsMatrix) dummyIndividuals = config.disabledIndividualsMatrix;
+        else {
+            pickNRandomIndices(population, Math.floor((1 - config.populationDensity) * size))
+                .forEach((i) => {
+                    dummyIndividuals[i] = true;
+                });
+        }
+
+
         for (let i = 0; i < size; i++) {
             const zoneCoords = convertToXYCoord(i, Math.sqrt(size)).map((elem) => Math.floor(elem / zoneSide));
             const zoneNumber = convertToLinearCoord(zoneCoords, Math.sqrt(config.numberOfZones));
-            population[i] = createIndividual(susceptibilities[i], config, zoneNumber);
+            population[i] = createIndividual(susceptibilities[i], config, zoneNumber, dummyIndividuals[i]);
         }
 
         return population;
@@ -138,6 +148,10 @@ module.exports = (inputData) => {
         zoneIsolationThreshold = 0.5,
         zoneIsolationTimeout = 0,
         zoneIsolationBehavior = "BASIC",
+
+        // POPULATION_DENSITY
+        populationDensity,
+        disabledIndividualsMatrix,
     } = inputData;
 
     const config = {
@@ -145,6 +159,9 @@ module.exports = (inputData) => {
         infectionPeriod,
         populationPreset,
         numberOfZones,
+
+        disabledIndividualsMatrix,
+        populationDensity,
     };
 
     validateInput(inputData);
@@ -156,10 +173,14 @@ module.exports = (inputData) => {
     // eslint-disable-next-line no-param-reassign
     initialCarriers = [((Math.floor(matrixSide / 2)) * matrixSide) + (matrixSide / 2)];
 
-    const population = initPopulation(populationSize, config); // TODO pass S distribution to attribute S to each individual on setup
+    const population = initPopulation(populationSize, config);
 
     const carriers = [];
-    initialCarriers.forEach((carrier) => contaminate(population, carriers, carrier));
+    initialCarriers.forEach((carrier) => {
+        population[carrier].isDummy = false; // ensure that this is a valid individual
+        contaminate(population, carriers, carrier);
+
+    });
 
     const isolatedZones = [];
     for (let zone = 0; zone < numberOfZones; zone++) {

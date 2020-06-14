@@ -1,4 +1,4 @@
-const { removeQuarantined, pickNRandomIndices } = require("../utils");
+const { removeQuarantined, pickNRandomIndices, IndividualStates } = require("../utils");
 
 const QuarantineTypes = Object.freeze({
     NONE: "NONE",
@@ -26,6 +26,13 @@ const handleQuarantine = (
 
 };
 
+const canEnterQuarantine = (person) =>
+    !person.isDummy
+    && person.state !== IndividualStates.DEAD
+    && person.state !== IndividualStates.CURED
+    && !person.isQuarantined
+    && !person.isHospitalized;
+
 const handleFixedQuarantine = ({
     step,
     population,
@@ -37,7 +44,7 @@ const handleFixedQuarantine = ({
     if (step < quarantineDelay) return;
 
     if (step === quarantineDelay) {
-        pickNRandomIndices(population, Math.ceil(population.length * quarantinePercentage))
+        pickNRandomIndices(population, Math.ceil(population.length * quarantinePercentage), canEnterQuarantine)
             .forEach((idx) => startQuarantine(population, quarantined, idx, step));
     } else if (quarantineDelay + quarantinePeriod === step) {
         while (quarantined.length !== 0) {
