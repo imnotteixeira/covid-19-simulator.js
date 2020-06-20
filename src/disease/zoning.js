@@ -57,7 +57,7 @@ const handleBasicCautiousIsolation = ({
     );
 };
 
-const getAdjacentZones = (zone, matrixSide) => ([
+const getAdjacentZones = (zone, nZones) => ([
     zone - matrixSide - 1, // top-left
     zone - matrixSide, // top
     zone - matrixSide + 1, // top-right
@@ -66,7 +66,7 @@ const getAdjacentZones = (zone, matrixSide) => ([
     zone + matrixSide - 1, // bottom-left
     zone + matrixSide, // bottom
     zone + matrixSide + 1, // bottom-right
-]).filter((i) => i >= 0 && i < Math.pow(matrixSide, 2));
+]).filter((i) => i >= 0 && i < nZones);
 
 const handleAdvancedCautiousIsolation = ({
     population, confirmedCarriers, isolatedZones, zoneIsolationThreshold, step, zoneIsolationTimeout,
@@ -77,7 +77,7 @@ const handleAdvancedCautiousIsolation = ({
         confirmedCarriers,
         isolatedZones,
         (numberOfCarriers, index, carriersPerZone) => {
-            const adjacentZones = getAdjacentZones(index, Math.sqrt(population.length));
+            const adjacentZones = getAdjacentZones(index, isolatedZones.length);
 
             // If this zone is above threshold or any of the adjacent, isolate
             return (numberOfCarriers / (population.length / isolatedZones.length)) > zoneIsolationThreshold
