@@ -92,13 +92,13 @@ const handleAdvancedCautiousIsolation = ({
 
 };
 
-const handleFullLoockdownIsolation = ({
+const handleFullLockdownIsolation = ({
     population, confirmedCarriers, isolatedZones, zoneIsolationThreshold, step, zoneIsolationTimeout,
 }) => {
     const carriersPerZone = Array(isolatedZones.length).fill(0);
     confirmedCarriers.forEach((carrierIndex) => carriersPerZone[population[carrierIndex].zone]++);
 
-    if (confirmedCarriers.some((numberOfCarriers) => (
+    if (carriersPerZone.some((numberOfCarriers) => (
         numberOfCarriers / (population.length / isolatedZones.length)) > zoneIsolationThreshold,
     )) {
         // If at least one zone has confirmed carriers above the zoneIsolationThreshold, isolate all
@@ -116,7 +116,7 @@ const ZoneIsolationBehaviors = {
     BASIC: handleBasicIsolation,
     BASIC_CAUTIOUS: handleBasicCautiousIsolation,
     ADVANCED_CAUTIOUS: handleAdvancedCautiousIsolation,
-    FULL_LOCKDOWN: handleFullLoockdownIsolation,
+    FULL_LOCKDOWN: handleFullLockdownIsolation,
 };
 
 const handleZoneIsolation = (behavior, ...args) => {
