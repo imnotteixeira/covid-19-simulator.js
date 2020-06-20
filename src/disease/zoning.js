@@ -29,12 +29,12 @@ const deIsolateAfterTimeout = (isolatedZones, index, step, zoneIsolationTimeout)
     }
 };
 
-const handleBasicIsolation = ({ population, confirmedCarriers, isolatedZones, zoneIsolationThreshold }) => {
+const handleBasicIsolation = ({ population, confirmedCarriers, isolatedZones, zoneIsolationThreshold, realPopulationPerZone }) => {
     handleSimpleZoneIsolation(
         population,
         confirmedCarriers,
         isolatedZones,
-        (numberOfCarriers) => (numberOfCarriers / (population.length / isolatedZones.length)) > zoneIsolationThreshold,
+        (numberOfCarriers, zone) => (numberOfCarriers / realPopulationPerZone[zone]) > zoneIsolationThreshold,
         (_, index) => {
             deIsolateZone(isolatedZones, index);
         },
@@ -43,13 +43,13 @@ const handleBasicIsolation = ({ population, confirmedCarriers, isolatedZones, zo
 };
 
 const handleBasicCautiousIsolation = ({
-    population, confirmedCarriers, isolatedZones, zoneIsolationThreshold, step, zoneIsolationTimeout,
+    population, confirmedCarriers, isolatedZones, zoneIsolationThreshold, step, zoneIsolationTimeout, realPopulationPerZone,
 }) => {
     handleSimpleZoneIsolation(
         population,
         confirmedCarriers,
         isolatedZones,
-        (numberOfCarriers) => (numberOfCarriers / (population.length / isolatedZones.length)) > zoneIsolationThreshold,
+        (numberOfCarriers, zone) => (numberOfCarriers / realPopulationPerZone[zone]) > zoneIsolationThreshold,
         (_, index) => {
             deIsolateAfterTimeout(isolatedZones, index, step, zoneIsolationTimeout);
         },
@@ -57,32 +57,35 @@ const handleBasicCautiousIsolation = ({
     );
 };
 
-const getAdjacentZones = (zone, nZones) => ([
-    zone - matrixSide - 1, // top-left
-    zone - matrixSide, // top
-    zone - matrixSide + 1, // top-right
-    zone + 1, // right
-    zone - 1, // left
-    zone + matrixSide - 1, // bottom-left
-    zone + matrixSide, // bottom
-    zone + matrixSide + 1, // bottom-right
-]).filter((i) => i >= 0 && i < nZones);
+const getAdjacentZones = (zone, nZones) => {
+    const nZonesPerSide = Math.sqrt(nZones);
+    return [
+        zone - nZonesPerSide - 1, // top-left
+        zone - nZonesPerSide, // top
+        zone - nZonesPerSide + 1, // top-right
+        zone + 1, // right
+        zone - 1, // left
+        zone + nZonesPerSide - 1, // bottom-left
+        zone + nZonesPerSide, // bottom
+        zone + nZonesPerSide + 1, // bottom-right
+    ].filter((i) => i >= 0 && i < nZones);
+};
 
 const handleAdvancedCautiousIsolation = ({
-    population, confirmedCarriers, isolatedZones, zoneIsolationThreshold, step, zoneIsolationTimeout,
+    population, confirmedCarriers, isolatedZones, zoneIsolationThreshold, step, zoneIsolationTimeout, realPopulationPerZone,
 }) => {
 
     handleSimpleZoneIsolation(
         population,
         confirmedCarriers,
         isolatedZones,
-        (numberOfCarriers, index, carriersPerZone) => {
-            const adjacentZones = getAdjacentZones(index, isolatedZones.length);
+        (numberOfCarriers, currentZone, carriersPerZone) => {
+            const adjacentZones = getAdjacentZones(currentZone, isolatedZones.length);
 
             // If this zone is above threshold or any of the adjacent, isolate
-            return (numberOfCarriers / (population.length / isolatedZones.length)) > zoneIsolationThreshold
-                || adjacentZones.some((zone) =>
-                    carriersPerZone[zone] / (population.length / isolatedZones.length) > zoneIsolationThreshold);
+            return (numberOfCarriers / realPopulationPerZone[currentZone]) > zoneIsolationThreshold
+                || adjacentZones.some((adjacentZone) =>
+                    carriersPerZone[adjacentZone] / realPopulationPerZone[currentZone] > zoneIsolationThreshold);
         },
         (_, index) => {
             deIsolateAfterTimeout(isolatedZones, index, step, zoneIsolationTimeout);
@@ -93,13 +96,13 @@ const handleAdvancedCautiousIsolation = ({
 };
 
 const handleFullLockdownIsolation = ({
-    population, confirmedCarriers, isolatedZones, zoneIsolationThreshold, step, zoneIsolationTimeout,
+    population, confirmedCarriers, isolatedZones, zoneIsolationThreshold, step, zoneIsolationTimeout, realPopulationPerZone,
 }) => {
     const carriersPerZone = Array(isolatedZones.length).fill(0);
     confirmedCarriers.forEach((carrierIndex) => carriersPerZone[population[carrierIndex].zone]++);
 
-    if (carriersPerZone.some((numberOfCarriers) => (
-        numberOfCarriers / (population.length / isolatedZones.length)) > zoneIsolationThreshold,
+    if (carriersPerZone.some((numberOfCarriers, zone) => (
+        numberOfCarriers / realPopulationPerZone[zone]) > zoneIsolationThreshold,
     )) {
         // If at least one zone has confirmed carriers above the zoneIsolationThreshold, isolate all
         isolatedZones.forEach((_, i) => {
