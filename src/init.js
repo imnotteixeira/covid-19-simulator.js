@@ -83,14 +83,22 @@ const initPopulation = (size, config) => {
                 });
         }
 
+        const realPopulationPerZone = Array(config.numberOfZones).fill(0);
+
 
         for (let i = 0; i < size; i++) {
             const zoneCoords = convertToXYCoord(i, Math.sqrt(size)).map((elem) => Math.floor(elem / zoneSide));
             const zoneNumber = convertToLinearCoord(zoneCoords, Math.sqrt(config.numberOfZones));
+
+            realPopulationPerZone[zoneNumber] += dummyIndividuals[i] ? 0 : 1;
+
             population[i] = createIndividual(susceptibilities[i], config, zoneNumber, dummyIndividuals[i]);
         }
 
-        return population;
+        return {
+            population,
+            realPopulationPerZone,
+        };
 
     } else {
         throw new Error("Population Size must be a perfect square");
@@ -173,7 +181,7 @@ module.exports = (inputData) => {
     // eslint-disable-next-line no-param-reassign
     initialCarriers = [((Math.floor(matrixSide / 2)) * matrixSide) + (matrixSide / 2)];
 
-    const population = initPopulation(populationSize, config);
+    const { population, realPopulationPerZone } = initPopulation(populationSize, config);
 
     const carriers = [];
     initialCarriers.forEach((carrier) => {
@@ -220,5 +228,6 @@ module.exports = (inputData) => {
         zoneIsolationThreshold,
         zoneIsolationBehavior,
         zoneIsolationTimeout,
+        realPopulationPerZone,
     };
 };

@@ -41,6 +41,7 @@ const simulateStep = (simulationState, maxSteps, hooks) => {
         zoneIsolationThreshold,
         zoneIsolationBehavior,
         zoneIsolationTimeout,
+        realPopulationPerZone,
     } = simulationState;
 
     const {
@@ -85,6 +86,7 @@ const simulateStep = (simulationState, maxSteps, hooks) => {
         zoneIsolationThreshold,
         step,
         zoneIsolationTimeout,
+        realPopulationPerZone,
     });
 
     hospitalize(population, carriers, hospitalized, hospitalCapacity, incubationPeriod);
