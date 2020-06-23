@@ -179,7 +179,7 @@ module.exports = (inputData) => {
 
     const matrixSide = Math.sqrt(populationSize);
     // eslint-disable-next-line no-param-reassign
-    initialCarriers = [((Math.floor(matrixSide / 2)) * matrixSide) + (matrixSide / 2)];
+    initialCarriers = [((Math.floor(matrixSide / 2)) * matrixSide) + Math.floor(matrixSide / 2)];
 
     const { population, realPopulationPerZone } = initPopulation(populationSize, config);
 
