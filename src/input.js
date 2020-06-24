@@ -2,10 +2,10 @@
 const yup = require("yup");
 const { PopulationPresets } = require("./presets");
 const { QuarantineTypes } = require("./disease/quarantine");
+const { ZoneIsolationBehaviors } = require("./disease/zoning");
 
 const InputSchema = yup.object().shape({
     populationSize: yup.number()
-        .positive()
         .min(9)
         .test({
             name: "perfect-square",
@@ -57,6 +57,42 @@ const InputSchema = yup.object().shape({
         .lessThan(yup.ref("populationSize"), "${path} must be less than populationSize (${less})"),
     testCooldown: yup.number()
         .min(0),
+
+    // ZONING
+    numberOfZones: yup.number()
+        .min(1)
+        .test({
+            name: "perfect-square",
+            message: "${path} must be a perfect square",
+            test: (value) => Math.sqrt(value) % 1 === 0,
+        })
+        .test({
+            name: "fits-population",
+            message: "sqrt(populationSize) must be divisible by sqrt(${path})",
+            test: function(value){ return Math.sqrt(this.resolve(yup.ref("populationSize"))) % Math.sqrt(value) === 0; }
+        }),
+    zoneIsolationThreshold: yup.number()
+        .min(0)
+        .max(1),
+    zoneIsolationTimeout: yup.number()
+        .integer()
+        .min(0),
+    zoneIsolationBehavior: yup.string()
+        .oneOf(Object.keys(ZoneIsolationBehaviors)),
+
+    // POPULATION_DENSITY
+    populationDensity: yup.number()
+        .min(0)
+        .max(1),
+    disabledIndividualsMatrix: yup.array(yup.boolean())
+        .test({
+            name: 'disabled-individuals-size',
+            message: "${path}'s length must be populationSize",
+            test: function(value){
+                return !value
+                    || value.length === this.resolve(yup.ref("populationSize").length);
+            }, 
+        }),
 });
 
 
