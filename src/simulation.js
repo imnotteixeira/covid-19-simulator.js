@@ -42,6 +42,7 @@ const simulateStep = (simulationState, maxSteps, hooks) => {
         zoneIsolationBehavior,
         zoneIsolationTimeout,
         realPopulationPerZone,
+        realPopulationSize,
     } = simulationState;
 
     const {
@@ -49,10 +50,16 @@ const simulateStep = (simulationState, maxSteps, hooks) => {
         stepEnd = () => {},
     } = (hooks ? hooks : {});
 
+
+    const metricsPayload = {
+        ...simulationState,
+        populationSize: realPopulationSize,
+    };
+
     if (step === 0) {
         onSimulationStart(simulationState);
         MetricsService.collect({
-            ...simulationState,
+            ...metricsPayload,
             averageInteractions: 0,
             averageContaminations: 0,
             newTests: 0,
@@ -63,6 +70,7 @@ const simulateStep = (simulationState, maxSteps, hooks) => {
     if (carriers.length === 0) {
         console.warn("No carriers left, Stopping simulation...");
         simulationState.ended = true;
+        MetricsService.afterExecutionCollect(metricsPayload);
         return simulationState;
     }
 
@@ -77,6 +85,11 @@ const simulateStep = (simulationState, maxSteps, hooks) => {
     calculateOutcomes(population, carriers, dead, cured, hospitalized, hospitalEffectiveness, confirmedCarriers);
 
     const { newTests, newPositiveTests } = test(population, confirmedCarriers, testRate, testCooldown, step);
+
+    metricsPayload.averageInteractions = averageInteractions;
+    metricsPayload.averageContaminations = averageContaminations;
+    metricsPayload.newTests = newTests;
+    metricsPayload.newPositiveTests = newPositiveTests;
 
     handleZoneIsolation(zoneIsolationBehavior, {
         population,
@@ -101,19 +114,14 @@ const simulateStep = (simulationState, maxSteps, hooks) => {
         confirmedCarriers,
     });
 
-    MetricsService.collect({
-        ...simulationState,
-        averageInteractions,
-        averageContaminations,
-        newTests,
-        newPositiveTests,
-    });
+    MetricsService.collect(metricsPayload);
 
     stepEnd(simulationState);
 
     if (maxSteps && step === maxSteps) {
         console.warn(`Maximum steps reached (${maxSteps}), Stopping simulation...`);
         simulationState.ended = true;
+        MetricsService.afterExecutionCollect(metricsPayload);
     }
 
     return simulationState;

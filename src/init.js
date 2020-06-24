@@ -207,5 +207,6 @@ module.exports = (inputData) => {
         zoneIsolationBehavior,
         zoneIsolationTimeout,
         realPopulationPerZone,
+        realPopulationSize: realPopulationPerZone.reduce((a, b) => a + b, 0),
     };
 };

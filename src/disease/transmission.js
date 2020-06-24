@@ -24,19 +24,20 @@ const getAffectedCoords = (line, col, spreadRadius, matrixSide, isolatedZones, p
         for (let y = line - spreadRadius; y <= line + spreadRadius; y++) {
             if (
                 !isWithinBounds(y, x, matrixSide)
-                || population[convertToLinearCoord([line, col], matrixSide)].isDummy
+                || population[convertToLinearCoord([y, x], matrixSide)].isDummy
             ) continue; // Ignore out of bounds coordinates and dummy elements (population density)
 
             const distance = Math.sqrt(Math.pow(x - col, 2) + Math.pow(y - line, 2));
             const sourceZone = population[convertToLinearCoord([line, col], matrixSide)].zone;
             const targetZone = population[convertToLinearCoord([y, x], matrixSide)].zone;
-            if (!(x === line && y === col)
+            if (!(x === col && y === line)
                 && ((sourceZone === targetZone) || (!isolatedZones[sourceZone].isIsolated && !isolatedZones[targetZone].isIsolated))
                 && ((1 - (distance / (spreadRadius + 1))) < Math.random())
             )
                 affected.push([y, x]);
         }
     }
+
     return affected;
 };
 
