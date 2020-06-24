@@ -2,7 +2,6 @@ const { IndividualStates, convertToXYCoord, convertToLinearCoord, pickNRandomInd
 const { QuarantineTypes } = require("./disease/quarantine");
 const { validateInput } = require("./input");
 const { contaminate } = require("./disease/transmission");
-const { QuarantineTypes } = require("./disease/quarantine");
 const { PopulationPresets } = require("./presets");
 /**
  * Generates size values of S, according to distribution
