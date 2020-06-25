@@ -1,18 +1,18 @@
 const { pickNRandomIndices, IndividualStates } = require("../utils");
 
-const canBeTested = (cooldown) => (person) =>
+const canBeTested = (cooldown, step) => (person) =>
     !person.isDummy
     && person.state !== IndividualStates.CONFIRMED_CARRIER
     && person.state !== IndividualStates.DEAD
     && person.state !== IndividualStates.CURED
     && !person.isHospitalized
-    && (person.lastTestedOnDay === -1 || person.lastTestedOnDay > cooldown);
+    && (person.lastTestedOnDay === -1 || person.lastTestedOnDay + cooldown < step);
 
 const test = (population, confirmedCarriers, testRate, testCooldown, step) => {
     const tests = pickNRandomIndices(
         population,
         testRate,
-        canBeTested(testCooldown),
+        canBeTested(testCooldown, step),
     ).map(
         (pickedIndex) => testPerson(population, pickedIndex, confirmedCarriers, step),
     );
