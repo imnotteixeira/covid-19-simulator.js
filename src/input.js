@@ -39,10 +39,16 @@ const InputSchema = yup.object().shape({
     quarantineEffectiveness: yup.number()
         .min(0)
         .max(1),
-    quarantinePeriod: yup.number()
-        .min(1),
-    quarantineDelay: yup.number()
-        .min(1),
+    quarantinePeriod: yup.number().when("quarantineType", {
+        is: QuarantineTypes.FIXED_PERCENTAGE,
+        then: yup.number().min(1),
+        otherwise: yup.number().notRequired(),
+    }),
+    quarantineDelay: yup.number().when("quarantineType", {
+        is: QuarantineTypes.NONE,
+        then: yup.number().notRequired(),
+        otherwise: yup.number().min(1),
+    }),
     quarantineType: yup.string()
         .oneOf(Object.keys(QuarantineTypes)),
     quarantinePercentage: yup.number()
@@ -69,7 +75,9 @@ const InputSchema = yup.object().shape({
         .test({
             name: "fits-population",
             message: "sqrt(populationSize) must be divisible by sqrt(${path})",
-            test: function(value){ return Math.sqrt(this.resolve(yup.ref("populationSize"))) % Math.sqrt(value) === 0; }
+            test: function(value) {
+                return Math.sqrt(this.resolve(yup.ref("populationSize"))) % Math.sqrt(value) === 0;
+            },
         }),
     zoneIsolationThreshold: yup.number()
         .min(0)
@@ -86,12 +94,12 @@ const InputSchema = yup.object().shape({
         .max(1),
     disabledIndividualsMatrix: yup.array(yup.boolean())
         .test({
-            name: 'disabled-individuals-size',
+            name: "disabled-individuals-size",
             message: "${path}'s length must be populationSize",
-            test: function(value){
+            test: function(value) {
                 return !value
                     || value.length === this.resolve(yup.ref("populationSize").length);
-            }, 
+            },
         }),
 });
 

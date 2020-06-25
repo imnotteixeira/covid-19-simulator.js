@@ -9,6 +9,10 @@ const countCarriers = (setData) => ({ carriers, dead, populationSize }) => {
     ]));
 };
 
+const countCarriersAbsolute = (setData) => ({ carriers }) => {
+    setData((data) => ([...data, carriers.length]));
+};
+
 const countDead = (setData) => ({ carriers, dead, cured }) => {
     setData((data) => ([...data, dead.length / (carriers.length + dead.length + cured.length)]));
 };
@@ -36,8 +40,8 @@ const countQuarantined = (setData) => ({ quarantined, populationSize, dead }) =>
     setData((data) => ([...data, quarantined.length / (populationSize - dead.length)]));
 };
 
-const countConfirmedCarriers = (setData) => ({ confirmedCarriers, dead, populationSize }) => {
-    setData((data) => ([...data, confirmedCarriers.length / (populationSize - dead.length)]));
+const countConfirmedCarriersAbsolute = (setData) => ({ newPositiveTests }) => {
+    setData((data) => ([...data, newPositiveTests + (data.length === 0 ? 0 : data[data.length - 1])]));
 };
 
 const countConfirmedCarriersOverInfected = (setData) => ({ confirmedCarriers, carriers }) => {
@@ -62,6 +66,7 @@ const updateValue = (dataField) => (setData) => (input) => {
 
 module.exports = () => {
     MetricsService.register("carrier-count", countCarriers, []);
+    MetricsService.register("carrier-absolute-count", countCarriersAbsolute, []);
     MetricsService.register("dead-count", countDead, []);
     MetricsService.register("dead-absolute-count", countDeadAbsolute, []);
     MetricsService.register("cured-count", countCured, []);
@@ -73,7 +78,7 @@ module.exports = () => {
     MetricsService.register("quarantined-count", countQuarantined, []);
     MetricsService.register("positive-test-count", countPositiveTests, []);
     MetricsService.register("total-test-count", countTotalTests, []);
-    MetricsService.register("confirmed-carrier-count", countConfirmedCarriers, []);
+    MetricsService.register("confirmed-carrier-cumulative-count", countConfirmedCarriersAbsolute, []);
     MetricsService.register("confirmed-carrier-percentage", countConfirmedCarriersOverInfected, []);
     MetricsService.register("carriers-history", updateCarriersHistory, []);
 };
